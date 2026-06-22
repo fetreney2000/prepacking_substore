@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Inventori Prabungkus Hospital Keningau</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --warning: #d97706;
+  --warning-light: #fef3c7;
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+  --info: #0891b2;
+  --info-light: #cffafe;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --sidebar-width: 260px;
+  --header-height: 56px;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:var(--gray-100);color:var(--gray-800);line-height:1.5;overflow:hidden;height:100vh}
+.app-layout{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-width);background:var(--gray-900);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sidebar-header{padding:16px 20px;border-bottom:1px solid var(--gray-700);display:flex;align-items:center;gap:12px}
+.sidebar-header svg{width:32px;height:32px;flex-shrink:0}
+.sidebar-header h2{font-size:14px;font-weight:600;line-height:1.3}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:background .15s;color:var(--gray-400);font-size:14px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--gray-800);color:#fff}
+.nav-item.active{background:var(--primary);color:#fff}
+.nav-item svg{width:20px;height:20px;flex-shrink:0}
+.main-area{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;height:100vh}
+.header{height:var(--header-height);background:#fff;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0}
+.header h1{font-size:18px;font-weight:600;color:var(--gray-800)}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.content{flex:1;overflow-y:auto;padding:24px}
+.page{display:none}
+.page.active{display:block}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.page-header h2{font-size:20px;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#15803d}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-outline{background:#fff;color:var(--gray-700);border-color:var(--gray-300)}
+.btn-outline:hover{background:var(--gray-50)}
+.btn-warning{background:var(--warning);color:#fff}
+.btn-warning:hover{background:#b45309}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-icon{padding:6px;border:none;background:none;cursor:pointer;color:var(--gray-500);border-radius:var(--radius)}
+.btn-icon:hover{background:var(--gray-100);color:var(--gray-700)}
+.btn-icon svg{width:18px;height:18px}
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);box-shadow:var(--shadow)}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--gray-200);font-weight:600;font-size:15px}
+.card-body{padding:20px}
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.summary-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px;display:flex;align-items:center;gap:16px}
+.summary-card .icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.summary-card .icon-wrap svg{width:24px;height:24px}
+.summary-card .info h3{font-size:24px;font-weight:700;line-height:1}
+.summary-card .info p{font-size:13px;color:var(--gray-500);margin-top:2px}
+.icon-blue{background:var(--primary-light);color:var(--primary)}
+.icon-green{background:var(--success-light);color:var(--success)}
+.icon-yellow{background:var(--warning-light);color:var(--warning)}
+.icon-red{background:var(--danger-light);color:var(--danger)}
+.icon-cyan{background:var(--info-light);color:var(--info)}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--gray-200)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--gray-50)}
+th{padding:10px 12px;text-align:left;font-weight:600;color:var(--gray-600);border-bottom:2px solid var(--gray-200);white-space:nowrap;position:relative;user-select:none}
+th.sortable{cursor:pointer}
+th.sortable:hover{background:var(--gray-200)}
+td{padding:8px 12px;border-bottom:1px solid var(--gray-100);vertical-align:middle}
+tr:hover td{background:var(--gray-50)}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.badge{display:inline-flex;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600}
+.badge-success{background:var(--success-light);color:var(--success)}
+.badge-warning{background:var(--warning-light);color:var(--warning)}
+.badge-danger{background:var(--danger-light);color:var(--danger)}
+.badge-info{background:var(--info-light);color:var(--info)}
+.badge-gray{background:var(--gray-100);color:var(--gray-600)}
+.search-box{position:relative}
+.search-box input{padding:8px 12px 8px 36px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:14px;width:100%;max-width:300px;outline:none}
+.search-box input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--gray-400)}
+.filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar select,.filter-bar input{padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:13px;outline:none}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.modal-lg{max-width:900px}
+.modal-sm{max-width:450px}
+.modal-header{padding:16px 24px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:18px;font-weight:600}
+.modal-body{padding:24px;overflow-y:auto;flex:1}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:8px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--gray-600);margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:14px;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-check{display:flex;align-items:center;gap:8px}
+.form-check input[type=checkbox]{width:auto}
+.empty-state{text-align:center;padding:48px 24px;color:var(--gray-500)}
+.empty-state svg{width:48px;height:48px;margin-bottom:12px;opacity:.5}
+.empty-state p{font-size:14px}
+.text-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;display:inline-block}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:500;z-index:2000;animation:slideIn .3s ease}
+.toast-success{background:var(--success)}
+.toast-error{background:var(--danger)}
+.toast-info{background:var(--info)}
+@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.footer-bar{height:32px;background:#fff;border-top:1px solid var(--gray-200);display:flex;align-items:center;padding:0 24px;font-size:12px;color:var(--gray-500);flex-shrink:0;gap:16px}
+.card-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.sku-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:16px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .15s}
+.sku-card:hover{box-shadow:var(--shadow-md)}
+.sku-card .sku-header{display:flex;justify-content:space-between;align-items:flex-start}
+.sku-card .sku-kod{font-size:12px;color:var(--gray-500);font-family:monospace}
+.sku-card .sku-nama{font-weight:600;font-size:14px}
+.sku-card .sku-meta{display:flex;gap:12px;font-size:12px;color:var(--gray-500)}
+.sku-card .sku-actions{display:flex;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid var(--gray-100)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--gray-200);padding-bottom:0}
+.tab{padding:8px 16px;cursor:pointer;font-size:14px;font-weight:500;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab:hover{color:var(--gray-700)}
+.order-item-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:8px}
+.order-item-row select,.order-item-row input{padding:6px 8px;border:1px solid var(--gray-300);border-radius:4px;font-size:13px}
+.order-item-row .item-remove{cursor:pointer;color:var(--danger)}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.gap-8{gap:8px}
+.gap-12{gap:12px}
+.mb-16{margin-bottom:16px}
+.mt-16{margin-top:16px}
+.print-only{display:none}
+@media print{
+  .sidebar,.header,.footer-bar,.btn,.search-box,.filter-bar,.no-print{display:none!important}
+  .main-area{margin-left:0!important}
+  .content{padding:0!important}
+  .print-only{display:block!important}
+  .page{display:block!important}
+  .page:not(.print-target){display:none!important}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-area{margin-left:0}
+  .summary-cards{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .card-view{grid-template-columns:1fr}
+}
+select[multiple]{min-height:80px}
+.table-scroll{overflow-x:auto;max-height:500px;overflow-y:auto}
+.highlight{background:#fef08a}
+</style>
+</head>
+<body>
+<div class="app-layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    <h2 id="sidebar-title">Sistem Inventori Prabungkus</h2>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav">
+    <button class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+      Papan Pemuka
+    </button>
+    <button class="nav-item" data-page="skus">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      Pengurusan SKU
+    </button>
+    <button class="nav-item" data-page="groups">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Kumpulan
+    </button>
+    <button class="nav-item" data-page="create-order">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+      Cipta Pesanan
+    </button>
+    <button class="nav-item" data-page="edit-order">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      Edit Pesanan
+    </button>
+    <button class="nav-item" data-page="order-report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Laporan Pesanan
+    </button>
+    <button class="nav-item" data-page="sku-report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Laporan SKU
+    </button>
+    <button class="nav-item" data-page="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      Tetapan
+    </button>
+    <button class="nav-item" data-page="sync">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Selaraskan
+    </button>
+    <button class="nav-item" data-page="help">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Bantuan
+    </button>
+    <button class="nav-item" data-page="copyright">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.83 14.83a4 4 0 11-1.172-6.092"/></svg>
+      Hak Cipta
+    </button>
+  </nav>
+</aside>
+
+<div class="main-area">
+<header class="header">
+  <button class="btn-icon no-print" id="menu-toggle" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <h1 id="app-title-display">Sistem Inventori Prabungkus Hospital Keningau</h1>
+  <div class="header-right">
+    <span id="clock-display" style="font-size:13px;color:var(--gray-500)"></span>
+  </div>
+</header>
+
+<main class="content" id="main-content">
+
+<!-- ========== DASHBOARD ========== -->
+<div class="page active" id="page-dashboard">
+  <div class="summary-cards" id="dashboard-summary"></div>
+  <div class="card mb-16">
+    <div class="card-header flex-between">
+      <span>Stok Rendah / Kehabisan</span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-scroll">
+        <table id="low-stock-table">
+          <thead><tr>
+            <th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok Semasa</th><th>Min</th><th>Status</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SKU MANAGEMENT ========== -->
+<div class="page" id="page-skus">
+  <div class="page-header">
+    <h2>Pengurusan SKU</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" id="toggle-view-mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Paparan Kad
+      </button>
+      <button class="btn btn-primary" id="btn-add-sku">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14m-7-7h14"/></svg>
+        Tambah SKU
+      </button>
+    </div>
+  </div>
+  <div class="filter-bar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="sku-search" placeholder="Cari kod atau nama...">
+    </div>
+    <select id="sku-group-filter"><option value="">Semua Kumpulan</option></select>
+    <label class="form-check" style="font-size:13px">
+      <input type="checkbox" id="sku-enabled-filter" checked> Aktif sahaja
+    </label>
+  </div>
+  <div id="sku-table-view">
+    <div class="table-wrap">
+      <table id="sku-table">
+        <thead><tr>
+          <th class="sortable" data-col="kod">Kod</th>
+          <th class="sortable" data-col="nama">Nama</th>
+          <th>Kumpulan</th>
+          <th class="sortable text-right" data-col="stokSemasa">Stok</th>
+          <th class="sortable text-right" data-col="awu">AWU</th>
+          <th>Min</th><th>Penimbal</th><th>Maks</th>
+          <th class="sortable" data-col="status">Status</th>
+          <th>Aksi</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="sku-card-view" style="display:none"></div>
+</div>
+
+<!-- ========== GROUPS ========== -->
+<div class="page" id="page-groups">
+  <div class="page-header">
+    <h2>Kumpulan</h2>
+    <button class="btn btn-primary" id="btn-add-group">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14m-7-7h14"/></svg>
+      Tambah Kumpulan
+    </button>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table id="group-table">
+          <thead><tr><th>ID</th><th>Nama</th><th>Nota</th><th>SKU</th><th>Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CREATE ORDER ========== -->
+<div class="page" id="page-create-order">
+  <div class="page-header">
+    <h2>Cipta Pesanan Baru</h2>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tarikh</label>
+          <input type="date" id="create-order-date">
+        </div>
+        <div class="form-group">
+          <label>Nama Pembuat</label>
+          <input type="text" id="create-order-maker" value="Ahmad Fetre">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tempoh (Minggu)</label>
+          <input type="number" id="create-order-weeks" value="4" min="1" max="12">
+        </div>
+        <div class="form-group">
+          <label>Nota</label>
+          <input type="text" id="create-order-notes" placeholder="Pilihan">
+        </div>
+      </div>
+      <h3 style="margin:20px 0 12px;font-size:16px">Item Pesanan</h3>
+      <div id="create-order-items"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-outline btn-sm" id="btn-add-order-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14m-7-7h14"/></svg>
+          Tambah Item
+        </button>
+      </div>
+      <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn btn-primary" id="btn-save-order">Simpan Pesanan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== EDIT ORDER ========== -->
+<div class="page" id="page-edit-order">
+  <div class="page-header">
+    <h2>Edit / Urus Pesanan</h2>
+  </div>
+  <div class="filter-bar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="order-search" placeholder="Cari pesanan...">
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="table-scroll">
+        <table id="order-list-table">
+          <thead><tr>
+            <th>ID</th><th>Tarikh</th><th>Pembuat</th><th>Tempoh</th><th>Item</th><th>Aksi</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ORDER REPORT ========== -->
+<div class="page" id="page-order-report">
+  <div class="page-header">
+    <h2>Laporan Pesanan</h2>
+    <button class="btn btn-outline btn-sm" id="btn-print-order-report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Cetak
+    </button>
+  </div>
+  <div class="filter-bar">
+    <select id="report-order-select"><option value="">Pilih Pesanan</option></select>
+  </div>
+  <div id="order-report-content" class="card">
+    <div class="card-body">
+      <div class="empty-state"><p>Pilih pesanan untuk melihat laporan</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SKU REPORT ========== -->
+<div class="page" id="page-sku-report">
+  <div class="page-header">
+    <h2>Laporan SKU</h2>
+    <button class="btn btn-outline btn-sm" id="btn-print-sku-report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Cetak
+    </button>
+  </div>
+  <div class="filter-bar">
+    <select id="sku-report-group-filter"><option value="">Semua Kumpulan</option></select>
+    <select id="sku-report-status-filter"><option value="">Semua Status</option>
+      <option value="ok">OK</option><option value="low">Rendah</option><option value="critical">Kritikal</option><option value="out">Kehabisan</option>
+    </select>
+    <label class="form-check" style="font-size:13px">
+      <input type="checkbox" id="sku-report-enabled-filter" checked> Aktif sahaja
+    </label>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0">
+      <div class="table-scroll">
+        <table id="sku-report-table">
+          <thead><tr>
+            <th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok</th><th>AWU</th>
+            <th>Min</th><th>Penimbal</th><th>Maks</th><th>Minggu Stok</th><th>Status</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS ========== -->
+<div class="page" id="page-settings">
+  <div class="page-header"><h2>Tetapan</h2></div>
+  <div class="card" style="max-width:600px">
+    <div class="card-body">
+      <div class="form-group">
+        <label>Tajuk Aplikasi</label>
+        <input type="text" id="setting-app-title">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Minggu Minimum</label>
+          <input type="number" id="setting-min-weeks" min="1" max="12">
+        </div>
+        <div class="form-group">
+          <label>Minggu Penimbal (Buffer)</label>
+          <input type="number" id="setting-buffer-weeks" min="1" max="12">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Minggu Maksimum</label>
+          <input type="number" id="setting-max-weeks" min="1" max="52">
+        </div>
+        <div class="form-group">
+          <label>Nama Fail Default</label>
+          <input type="text" id="setting-filename">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mod Paparan</label>
+        <select id="setting-layout-mode">
+          <option value="table">Jadual</option>
+          <option value="card">Kad</option>
+        </select>
+      </div>
+      <div style="margin-top:20px">
+        <button class="btn btn-primary" id="btn-save-settings">Simpan Tetapan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SYNC ========== -->
+<div class="page" id="page-sync">
+  <div class="page-header"><h2>Selaraskan Data</h2></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px">
+    <div class="card">
+      <div class="card-header">Eksport Pangkalan Data</div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px">Muat turun semua data sebagai fail JSON sebagai sandaran.</p>
+        <button class="btn btn-primary" id="btn-export-db">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Eksport JSON
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Import Pangkalan Data</div>
+      <div class="card-body">
+        <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px">Import data dari fail JSON sandaran. Semua data sedia ada akan diganti.</p>
+        <input type="file" id="import-file-input" accept=".json" style="display:none">
+        <button class="btn btn-warning" id="btn-import-db">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Import JSON
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card mt-16" style="max-width:700px">
+    <div class="card-header">Import Excel (Stok)</div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px">Import data stok semasa dari fail Excel. Kolom: Drug / Non Drug Code, Drug / Non Drug Description, Quantity Available</p>
+      <input type="file" id="excel-file-input" accept=".xls,.xlsx" style="display:none">
+      <button class="btn btn-outline" id="btn-import-excel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Pilih Fail Excel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== HELP ========== -->
+<div class="page" id="page-help">
+  <div class="page-header"><h2>Bantuan</h2></div>
+  <div class="card" style="max-width:800px">
+    <div class="card-body">
+      <h3 style="margin-bottom:12px">Pengenalan</h3>
+      <p style="font-size:14px;margin-bottom:16px">Sistem ini mengurus inventori prabungkus untuk Substor Hospital Keningau. Ia membantu mengira tahap stok, menjejaki pesanan, dan menghasilkan laporan.</p>
+      <h3 style="margin-bottom:12px">Pengiraan</h3>
+      <ul style="font-size:14px;margin-left:20px;margin-bottom:16px">
+        <li><strong>AWU (Penggunaan Mingguan Purata)</strong> = Purata penggunaan 3 bulan / 4.33</li>
+        <li><strong>Min</strong> = AWU x Minggu Minimum</li>
+        <li><strong>Penimbal</strong> = AWU x Minggu Penimbal</li>
+        <li><strong>Maks</strong> = AWU x Minggu Maksimum</li>
+      </ul>
+      <h3 style="margin-bottom:12px">Status Stok</h3>
+      <ul style="font-size:14px;margin-left:20px;margin-bottom:16px">
+        <li><span class="badge badge-success">OK</span> Stok melebihi tahap penimbal</li>
+        <li><span class="badge badge-warning">Rendah</span> Stok antara min dan penimbal</li>
+        <li><span class="badge badge-danger">Kritikal</span> Stok di bawah min</li>
+        <li><span class="badge badge-gray">Kehabisan</span> Stok sifar</li>
+      </ul>
+      <h3 style="margin-bottom:12px">Pintasan Papan Kekunci</h3>
+      <ul style="font-size:14px;margin-left:20px">
+        <li>Arrow keys dalam jadual: tatal</li>
+        <li>Ctrl+F: Fokus medan carian</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========== COPYRIGHT ========== -->
+<div class="page" id="page-copyright">
+  <div class="page-header"><h2>Hak Cipta</h2></div>
+  <div class="card" style="max-width:600px">
+    <div class="card-body" style="text-align:center;padding:48px">
+      <p style="font-size:16px;font-weight:600;margin-bottom:8px">Sistem Inventori Prabungkus Hospital Keningau</p>
+      <p style="color:var(--gray-500);margin-bottom:24px">Versi 2.0</p>
+      <p style="font-size:13px;color:var(--gray-400)">&copy; 2026 Hospital Keningau, Sabah, Malaysia.</p>
+      <p style="font-size:13px;color:var(--gray-400);margin-top:4px">Hak cipta terpelihara.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer class="footer-bar">
+  <span id="footer-clock"></span>
+  <span style="margin-left:auto">Sistem Inventori Prabungkus v2.0</span>
+</footer>
+</div>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<!-- SKU Modal -->
+<div class="modal-overlay" id="sku-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="sku-modal-title">Tambah SKU</h3>
+      <button class="btn-icon modal-close" data-modal="sku-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sku-edit-id">
+      <div class="form-row">
+        <div class="form-group"><label>Kod</label><input type="text" id="sku-form-kod"></div>
+        <div class="form-group"><label>Nama</label><input type="text" id="sku-form-nama"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Saiz Pek</label><input type="number" id="sku-form-saiz" value="100" min="1"></div>
+        <div class="form-group"><label>Kumpulan</label><select id="sku-form-group"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Stok Semasa</label><input type="number" id="sku-form-stok" value="0" min="0"></div>
+        <div class="form-group"><label>Nota</label><input type="text" id="sku-form-notes" placeholder="Pilihan"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Penggunaan Bulan 1</label><input type="number" id="sku-form-u1" value="0" min="0"></div>
+        <div class="form-group"><label>Penggunaan Bulan 2</label><input type="number" id="sku-form-u2" value="0" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Penggunaan Bulan 3</label><input type="number" id="sku-form-u3" value="0" min="0"></div>
+        <div class="form-group"></div>
+      </div>
+      <div class="form-check mb-16"><input type="checkbox" id="sku-form-enabled" checked><label for="sku-form-enabled">Aktif</label></div>
+      <div class="form-check mb-16"><input type="checkbox" id="sku-form-fullstock"><label for="sku-form-fullstock">Sentiasa Stok Penuh</label></div>
+      <div class="form-check mb-16"><input type="checkbox" id="sku-form-manual"><label for="sku-form-manual">Guna Tahap Manual</label></div>
+      <div id="sku-manual-fields" style="display:none">
+        <div class="form-row">
+          <div class="form-group"><label>Min Manual</label><input type="number" id="sku-form-min" value="0"></div>
+          <div class="form-group"><label>Penimbal Manual</label><input type="number" id="sku-form-penimbal" value="0"></div>
+        </div>
+        <div class="form-group"><label>Maks Manual</label><input type="number" id="sku-form-maks" value="0"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline modal-close" data-modal="sku-modal">Batal</button>
+      <button class="btn btn-primary" id="btn-save-sku">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Group Modal -->
+<div class="modal-overlay" id="group-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="group-modal-title">Tambah Kumpulan</h3>
+      <button class="btn-icon modal-close" data-modal="group-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="group-edit-id">
+      <div class="form-group"><label>Nama</label><input type="text" id="group-form-name"></div>
+      <div class="form-group"><label>Nota</label><input type="text" id="group-form-notes" placeholder="Pilihan"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline modal-close" data-modal="group-modal">Batal</button>
+      <button class="btn btn-primary" id="btn-save-group">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div class="modal-overlay" id="edit-order-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="edit-order-modal-title">Edit Pesanan</h3>
+      <button class="btn-icon modal-close" data-modal="edit-order-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-order-id">
+      <div class="form-row">
+        <div class="form-group"><label>Tarikh</label><input type="date" id="edit-order-date"></div>
+        <div class="form-group"><label>Nama Pembuat</label><input type="text" id="edit-order-maker"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tempoh (Minggu)</label><input type="number" id="edit-order-weeks" min="0" max="12"></div>
+        <div class="form-group"><label>Nota</label><input type="text" id="edit-order-notes"></div>
+      </div>
+      <h3 style="margin:20px 0 12px;font-size:16px">Item Pesanan</h3>
+      <div id="edit-order-items"></div>
+      <button class="btn btn-outline btn-sm mt-16" id="btn-add-edit-order-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14m-7-7h14"/></svg>
+        Tambah Item
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete-order">Padam</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline modal-close" data-modal="edit-order-modal">Batal</button>
+      <button class="btn btn-primary" id="btn-update-order">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Pengesahan Padam</h3>
+      <button class="btn-icon modal-close" data-modal="confirm-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">Adakah anda pasti?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline modal-close" data-modal="confirm-modal">Batal</button>
+      <button class="btn btn-danger" id="btn-confirm-yes">Padam</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Alert Modal -->
+<div class="modal-overlay" id="alert-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="alert-title">Makluman</h3>
+      <button class="btn-icon modal-close" data-modal="alert-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary modal-close" data-modal="alert-modal">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Alert HTML Modal -->
+<div class="modal-overlay" id="alert-html-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="alert-html-title">Makluman</h3>
+      <button class="btn-icon modal-close" data-modal="alert-html-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="alert-html-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary modal-close" data-modal="alert-html-modal">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+let appSettings = {};
+let allGroups = [];
+let allSkus = [];
+let allOrders = [];
+
+// ===== API LAYER =====
+async function apiFetch(url, options = {}) {
+  try {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+      ...options
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    return data;
+  } catch (err) {
+    showCustomAlert('Ralat Rangkaian', err.message);
+    throw err;
+  }
+}
+
+// ===== HELPERS =====
+function $(id) { return document.getElementById(id); }
+function $$(sel, ctx) { return (ctx || document).querySelectorAll(sel); }
+function showCustomAlert(title, message) {
+  $('alert-title').textContent = title;
+  $('alert-content').innerHTML = '<p>' + escHtml(String(message)) + '</p>';
+  $('alert-modal').classList.add('show');
+}
+function showCustomAlertHTML(title, html) {
+  $('alert-html-title').textContent = title;
+  $('alert-html-content').innerHTML = html;
+  $('alert-html-modal').classList.add('show');
+}
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + (type || 'success');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+function formatDate(d) {
+  if (!d) return '';
+  return d;
+}
+function formatNum(n) {
+  return Number(n || 0).toLocaleString('ms-MY');
+}
+
+// ===== CALCULATIONS =====
+function calculateAWU(sku) {
+  const total = (sku.usageMonth1 || 0) + (sku.usageMonth2 || 0) + (sku.usageMonth3 || 0);
+  return total / 3 / 4.33;
+}
+function roundToPackSize(qty, packSize) {
+  if (!packSize || packSize <= 0) return qty;
+  return Math.ceil(qty / packSize) * packSize;
+}
+function calculateLevels(sku) {
+  const awu = calculateAWU(sku);
+  let min, penimbal, maks;
+  if (sku.useManualLevels) {
+    min = sku.minManual || 0;
+    penimbal = sku.penimbalManual || 0;
+    maks = sku.maksManual || 0;
+  } else {
+    min = awu * (appSettings.minWeeks || 2);
+    penimbal = awu * (appSettings.bufferWeeks || 4);
+    maks = awu * (appSettings.maxWeeks || 6);
+  }
+  return {
+    awu: Math.round(awu),
+    min: roundToPackSize(min, sku.saizPek),
+    penimbal: roundToPackSize(penimbal, sku.saizPek),
+    maks: roundToPackSize(maks, sku.saizPek)
+  };
+}
+function determineStockStatus(sku) {
+  if (!sku.enabled) return 'disabled';
+  const levels = calculateLevels(sku);
+  const stok = sku.stokSemasa || 0;
+  if (stok === 0) return 'out';
+  if (stok <= levels.min) return 'critical';
+  if (stok <= levels.penimbal) return 'low';
+  return 'ok';
+}
+function statusLabel(status) {
+  const map = {
+    ok: 'OK',
+    low: 'Rendah',
+    critical: 'Kritikal',
+    out: 'Kehabisan',
+    disabled: 'Dinyahaktif'
+  };
+  return map[status] || status;
+}
+function statusBadge(status) {
+  const cls = { ok: 'success', low: 'warning', critical: 'danger', out: 'gray', disabled: 'gray' };
+  return '<span class="badge badge-' + (cls[status] || 'gray') + '">' + statusLabel(status) + '</span>';
+}
+
+// ===== MODAL CLOSERS =====
+function initModalClosers() {
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-close')) {
+      const id = e.target.dataset.modal || e.target.closest('.modal-overlay')?.id;
+      if (id) $(id).classList.remove('show');
+    }
+  });
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay') && e.target === e.currentTarget) {
+      e.target.classList.remove('show');
+    }
+  });
+}
+
+// ===== NAVIGATION =====
+function initNavigation() {
+  $$('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      $$('.page').forEach(p => p.classList.remove('active'));
+      const page = $('page-' + btn.dataset.page);
+      if (page) page.classList.add('active');
+    });
+  });
+}
+function navigateTo(page) {
+  const btn = document.querySelector('.nav-item[data-page="' + page + '"]');
+  if (btn) btn.click();
+}
+
+// ===== DASHBOARD =====
+async function loadDashboard() {
+  try {
+    allSkus = await apiFetch('/api/skus');
+    allGroups = await apiFetch('/api/groups');
+
+    const enabledSkus = allSkus.filter(s => s.enabled);
+    const lowStock = enabledSkus.filter(s => {
+      const st = determineStockStatus(s);
+      return st === 'low' || st === 'critical' || st === 'out';
+    });
+
+    const totalSkus = enabledSkus.length;
+    const totalGroups = allGroups.length;
+    const totalStock = enabledSkus.reduce((sum, s) => sum + (s.stokSemasa || 0), 0);
+    const lowCount = lowStock.length;
+
+    $('dashboard-summary').innerHTML = `
+      <div class="summary-card"><div class="icon-wrap icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div><div class="info"><h3>${totalSkus}</h3><p>Jumlah SKU Aktif</p></div></div>
+      <div class="summary-card"><div class="icon-wrap icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="info"><h3>${totalGroups}</h3><p>Kumpulan</p></div></div>
+      <div class="summary-card"><div class="icon-wrap icon-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="info"><h3>${formatNum(totalStock)}</h3><p>Jumlah Stok Semasa</p></div></div>
+      <div class="summary-card"><div class="icon-wrap icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div><div class="info"><h3>${lowCount}</h3><p>Stok Rendah/Kehabisan</p></div></div>
+    `;
+
+    const tbody = $('low-stock-table').querySelector('tbody');
+    if (lowStock.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:24px;color:var(--gray-500)">Semua stok mencukupi</td></tr>';
+    } else {
+      tbody.innerHTML = lowStock.map(sku => {
+        const grp = allGroups.find(g => g.id === sku.groupId);
+        const levels = calculateLevels(sku);
+        const status = determineStockStatus(sku);
+        return `<tr>
+          <td><code>${escHtml(sku.kod)}</code></td>
+          <td>${escHtml(sku.nama)}</td>
+          <td>${grp ? escHtml(grp.name) : '-'}</td>
+          <td class="text-right">${formatNum(sku.stokSemasa)}</td>
+          <td class="text-right">${formatNum(levels.min)}</td>
+          <td>${statusBadge(status)}</td>
+        </tr>`;
+      }).join('');
+    }
+  } catch (err) {
+    console.error('Dashboard load error:', err);
+  }
+}
+
+// ===== SKU MANAGEMENT =====
+let skuViewMode = 'table';
+async function loadSkus() {
+  try {
+    allSkus = await apiFetch('/api/skus');
+    allGroups = await apiFetch('/api/groups');
+    renderSkus();
+  } catch (err) {
+    console.error('SKU load error:', err);
+  }
+}
+function getFilteredSkus() {
+  const search = ($('sku-search')?.value || '').toLowerCase();
+  const groupId = $('sku-group-filter')?.value;
+  const enabledOnly = $('sku-enabled-filter')?.checked;
+  return allSkus.filter(s => {
+    if (enabledOnly && !s.enabled) return false;
+    if (groupId && s.groupId !== parseInt(groupId)) return false;
+    if (search && !s.kod.toLowerCase().includes(search) && !s.nama.toLowerCase().includes(search)) return false;
+    return true;
+  });
+}
+function renderSkus() {
+  const filtered = getFilteredSkus();
+  if (skuViewMode === 'table') {
+    const tbody = $('sku-table').querySelector('tbody');
+    tbody.innerHTML = filtered.map(sku => {
+      const grp = allGroups.find(g => g.id === sku.groupId);
+      const levels = calculateLevels(sku);
+      const status = determineStockStatus(sku);
+      return `<tr>
+        <td><code class="text-truncate">${escHtml(sku.kod)}</code></td>
+        <td class="text-truncate">${escHtml(sku.nama)}</td>
+        <td>${grp ? escHtml(grp.name) : '-'}</td>
+        <td class="text-right">${formatNum(sku.stokSemasa)}</td>
+        <td class="text-right">${formatNum(levels.awu)}</td>
+        <td class="text-right">${formatNum(levels.min)}</td>
+        <td class="text-right">${formatNum(levels.penimbal)}</td>
+        <td class="text-right">${formatNum(levels.maks)}</td>
+        <td>${statusBadge(status)}</td>
+        <td>
+          <button class="btn-icon" onclick="window._editSku(${sku.id})" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button class="btn-icon" onclick="window._deleteSku(${sku.id})" title="Padam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </td>
+      </tr>`;
+    }).join('');
+  } else {
+    $('sku-card-view').innerHTML = filtered.length ? '<div class="card-view">' + filtered.map(sku => {
+      const grp = allGroups.find(g => g.id === sku.groupId);
+      const levels = calculateLevels(sku);
+      const status = determineStockStatus(sku);
+      return `<div class="sku-card">
+        <div class="sku-header"><span class="sku-kod">${escHtml(sku.kod)}</span>${statusBadge(status)}</div>
+        <div class="sku-nama">${escHtml(sku.nama)}</div>
+        <div class="sku-meta">
+          <span>${grp ? escHtml(grp.name) : '-'}</span>
+          <span>Stok: ${formatNum(sku.stokSemasa)}</span>
+        </div>
+        <div class="sku-meta">
+          <span>Min: ${formatNum(levels.min)}</span>
+          <span>Maks: ${formatNum(levels.maks)}</span>
+        </div>
+        <div class="sku-actions">
+          <button class="btn btn-outline btn-sm" onclick="window._editSku(${sku.id})">Edit</button>
+          <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="window._deleteSku(${sku.id})">Padam</button>
+        </div>
+      </div>`;
+    }).join('') + '</div>' : '<div class="empty-state"><p>Tiada SKU</p></div>';
+  }
+}
+window._editSku = function(id) {
+  const sku = allSkus.find(s => s.id === id);
+  if (!sku) return;
+  $('sku-modal-title').textContent = 'Edit SKU';
+  $('sku-edit-id').value = id;
+  $('sku-form-kod').value = sku.kod;
+  $('sku-form-nama').value = sku.nama;
+  $('sku-form-saiz').value = sku.saizPek;
+  $('sku-form-group').value = sku.groupId || '';
+  $('sku-form-stok').value = sku.stokSemasa || 0;
+  $('sku-form-notes').value = sku.notes || '';
+  $('sku-form-u1').value = sku.usageMonth1 || 0;
+  $('sku-form-u2').value = sku.usageMonth2 || 0;
+  $('sku-form-u3').value = sku.usageMonth3 || 0;
+  $('sku-form-enabled').checked = sku.enabled !== false;
+  $('sku-form-fullstock').checked = !!sku.fullStockAlways;
+  $('sku-form-manual').checked = !!sku.useManualLevels;
+  $('sku-manual-fields').style.display = sku.useManualLevels ? 'block' : 'none';
+  $('sku-form-min').value = sku.minManual || 0;
+  $('sku-form-penimbal').value = sku.penimbalManual || 0;
+  $('sku-form-maks').value = sku.maksManual || 0;
+  $('sku-modal').classList.add('show');
+};
+window._deleteSku = function(id) {
+  $('confirm-message').textContent = 'Adakah anda pasti mahu memadam SKU ini?';
+  $('confirm-modal').classList.add('show');
+  $('btn-confirm-yes').onclick = async function() {
+    try {
+      await apiFetch('/api/skus/' + id, { method: 'DELETE' });
+      $('confirm-modal').classList.remove('show');
+      showToast('SKU dipadam');
+      loadSkus();
+    } catch (err) { /* handled by apiFetch */ }
+  };
+};
+function initSKUEvents() {
+  $('btn-add-sku').addEventListener('click', () => {
+    $('sku-modal-title').textContent = 'Tambah SKU';
+    $('sku-edit-id').value = '';
+    $('sku-form-kod').value = '';
+    $('sku-form-nama').value = '';
+    $('sku-form-saiz').value = 100;
+    $('sku-form-group').value = '';
+    $('sku-form-stok').value = 0;
+    $('sku-form-notes').value = '';
+    $('sku-form-u1').value = 0;
+    $('sku-form-u2').value = 0;
+    $('sku-form-u3').value = 0;
+    $('sku-form-enabled').checked = true;
+    $('sku-form-fullstock').checked = false;
+    $('sku-form-manual').checked = false;
+    $('sku-manual-fields').style.display = 'none';
+    $('sku-form-min').value = 0;
+    $('sku-form-penimbal').value = 0;
+    $('sku-form-maks').value = 0;
+    $('sku-modal').classList.add('show');
+  });
+  $('sku-form-manual').addEventListener('change', function() {
+    $('sku-manual-fields').style.display = this.checked ? 'block' : 'none';
+  });
+  $('btn-save-sku').addEventListener('click', async () => {
+    const id = $('sku-edit-id').value;
+    const body = {
+      kod: $('sku-form-kod').value.trim(),
+      nama: $('sku-form-nama').value.trim(),
+      saizPek: parseInt($('sku-form-saiz').value) || 1,
+      groupId: $('sku-form-group').value ? parseInt($('sku-form-group').value) : null,
+      stokSemasa: parseInt($('sku-form-stok').value) || 0,
+      notes: $('sku-form-notes').value.trim(),
+      usageMonth1: parseInt($('sku-form-u1').value) || 0,
+      usageMonth2: parseInt($('sku-form-u2').value) || 0,
+      usageMonth3: parseInt($('sku-form-u3').value) || 0,
+      enabled: $('sku-form-enabled').checked,
+      fullStockAlways: $('sku-form-fullstock').checked,
+      useManualLevels: $('sku-form-manual').checked,
+      minManual: parseInt($('sku-form-min').value) || 0,
+      penimbalManual: parseInt($('sku-form-penimbal').value) || 0,
+      maksManual: parseInt($('sku-form-maks').value) || 0
+    };
+    if (!body.kod || !body.nama) return showCustomAlert('Ralat', 'Kod dan nama diperlukan');
+    try {
+      if (id) {
+        await apiFetch('/api/skus/' + id, { method: 'PUT', body: JSON.stringify(body) });
+        showToast('SKU dikemaskini');
+      } else {
+        await apiFetch('/api/skus', { method: 'POST', body: JSON.stringify(body) });
+        showToast('SKU ditambah');
+      }
+      $('sku-modal').classList.remove('show');
+      loadSkus();
+    } catch (err) { /* handled */ }
+  });
+  $('toggle-view-mode').addEventListener('click', () => {
+    skuViewMode = skuViewMode === 'table' ? 'card' : 'table';
+    $('toggle-view-mode').innerHTML = skuViewMode === 'table'
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg> Paparan Kad'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 10h18M3 14h18M3 6h18M3 18h18"/></svg> Paparan Jadual';
+    $('sku-table-view').style.display = skuViewMode === 'table' ? 'block' : 'none';
+    $('sku-card-view').style.display = skuViewMode === 'card' ? 'block' : 'none';
+    renderSkus();
+  });
+  $('sku-search').addEventListener('input', renderSkus);
+  $('sku-group-filter').addEventListener('change', renderSkus);
+  $('sku-enabled-filter').addEventListener('change', renderSkus);
+}
+
+// ===== GROUPS =====
+async function loadGroups() {
+  try {
+    allGroups = await apiFetch('/api/groups');
+    const tbody = $('group-table').querySelector('tbody');
+    tbody.innerHTML = allGroups.map(g => {
+      const skuCount = allSkus.filter(s => s.groupId === g.id).length;
+      return `<tr>
+        <td>${g.id}</td>
+        <td>${escHtml(g.name)}</td>
+        <td>${escHtml(g.notes || '')}</td>
+        <td>${skuCount}</td>
+        <td>
+          <button class="btn-icon" onclick="window._editGroup(${g.id})" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button class="btn-icon" onclick="window._deleteGroup(${g.id})" title="Padam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+        </td>
+      </tr>`;
+    }).join('');
+    populateGroupSelects();
+  } catch (err) {
+    console.error('Groups load error:', err);
+  }
+}
+function populateGroupSelects() {
+  const opts = '<option value="">Pilih Kumpulan</option>' + allGroups.map(g => '<option value="' + g.id + '">' + escHtml(g.name) + '</option>').join('');
+  if ($('sku-form-group')) $('sku-form-group').innerHTML = opts;
+  if ($('sku-group-filter')) $('sku-group-filter').innerHTML = '<option value="">Semua Kumpulan</option>' + allGroups.map(g => '<option value="' + g.id + '">' + escHtml(g.name) + '</option>').join('');
+  if ($('sku-report-group-filter')) $('sku-report-group-filter').innerHTML = '<option value="">Semua Kumpulan</option>' + allGroups.map(g => '<option value="' + g.id + '">' + escHtml(g.name) + '</option>').join('');
+}
+window._editGroup = function(id) {
+  const g = allGroups.find(gr => gr.id === id);
+  if (!g) return;
+  $('group-modal-title').textContent = 'Edit Kumpulan';
+  $('group-edit-id').value = id;
+  $('group-form-name').value = g.name;
+  $('group-form-notes').value = g.notes || '';
+  $('group-modal').classList.add('show');
+};
+window._deleteGroup = function(id) {
+  $('confirm-message').textContent = 'Adakah anda pasti mahu memadam kumpulan ini?';
+  $('confirm-modal').classList.add('show');
+  $('btn-confirm-yes').onclick = async function() {
+    try {
+      await apiFetch('/api/groups/' + id, { method: 'DELETE' });
+      $('confirm-modal').classList.remove('show');
+      showToast('Kumpulan dipadam');
+      loadGroups();
+    } catch (err) { /* handled */ }
+  };
+};
+function initGroupEvents() {
+  $('btn-add-group').addEventListener('click', () => {
+    $('group-modal-title').textContent = 'Tambah Kumpulan';
+    $('group-edit-id').value = '';
+    $('group-form-name').value = '';
+    $('group-form-notes').value = '';
+    $('group-modal').classList.add('show');
+  });
+  $('btn-save-group').addEventListener('click', async () => {
+    const id = $('group-edit-id').value;
+    const body = { name: $('group-form-name').value.trim(), notes: $('group-form-notes').value.trim() };
+    if (!body.name) return showCustomAlert('Ralat', 'Nama kumpulan diperlukan');
+    try {
+      if (id) {
+        await apiFetch('/api/groups/' + id, { method: 'PUT', body: JSON.stringify(body) });
+        showToast('Kumpulan dikemaskini');
+      } else {
+        await apiFetch('/api/groups', { method: 'POST', body: JSON.stringify(body) });
+        showToast('Kumpulan ditambah');
+      }
+      $('group-modal').classList.remove('show');
+      loadGroups();
+    } catch (err) { /* handled */ }
+  });
+}
+
+// ===== CREATE ORDER =====
+let createOrderItems = [];
+function renderCreateOrderItems() {
+  const container = $('create-order-items');
+  container.innerHTML = createOrderItems.map((item, i) => `
+    <div class="order-item-row" data-idx="${i}">
+      <select onchange="window._updateCreateItem(${i},'kod',this.value)" style="flex:2">
+        <option value="">Pilih SKU</option>
+        ${allSkus.filter(s => s.enabled).map(s => '<option value="' + s.kod + '"' + (item.kod === s.kod ? ' selected' : '') + '>' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('')}
+      </select>
+      <input type="number" value="${item.qtyOrdered || 0}" min="0" style="flex:1" onchange="window._updateCreateItem(${i},'qtyOrdered',parseInt(this.value)||0)" placeholder="Kuantiti">
+      <input type="text" value="${item.notes || ''}" style="flex:1" onchange="window._updateCreateItem(${i},'notes',this.value)" placeholder="Nota">
+      <button class="btn-icon item-remove" onclick="window._removeCreateItem(${i})" title="Padam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+window._updateCreateItem = function(idx, field, val) {
+  createOrderItems[idx][field] = val;
+};
+window._removeCreateItem = function(idx) {
+  createOrderItems.splice(idx, 1);
+  renderCreateOrderItems();
+};
+function initCreateOrderModal() {
+  $('btn-add-order-item').addEventListener('click', () => {
+    createOrderItems.push({ kod: '', qtyOrdered: 0, notes: '' });
+    renderCreateOrderItems();
+  });
+  $('btn-save-order').addEventListener('click', async () => {
+    const tarikh = $('create-order-date').value;
+    const namaPembuat = $('create-order-maker').value.trim();
+    const tempohMinggu = parseInt($('create-order-weeks').value) || 4;
+    const notes = $('create-order-notes').value.trim();
+    const items = createOrderItems.filter(it => it.kod && it.qtyOrdered > 0);
+    if (!tarikh) return showCustomAlert('Ralat', 'Tarikh diperlukan');
+    if (!namaPembuat) return showCustomAlert('Ralat', 'Nama pembuat diperlukan');
+    try {
+      await apiFetch('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({ tarikh, namaPembuat, tempohMinggu, notes, items })
+      });
+      showToast('Pesanan dicipta');
+      createOrderItems = [];
+      renderCreateOrderItems();
+      $('create-order-date').value = '';
+      $('create-order-notes').value = '';
+      loadOrders();
+    } catch (err) { /* handled */ }
+  });
+}
+
+// ===== EDIT ORDER =====
+async function loadOrders() {
+  try {
+    allOrders = await apiFetch('/api/orders');
+    const tbody = $('order-list-table').querySelector('tbody');
+    tbody.innerHTML = allOrders.map(o => {
+      return `<tr>
+        <td>${o.id}</td>
+        <td>${escHtml(o.tarikh)}</td>
+        <td>${escHtml(o.namaPembuat)}</td>
+        <td>${o.tempohMinggu || 0} minggu</td>
+        <td>-</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button>
+          <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button>
+        </td>
+      </tr>`;
+    }).join('');
+    populateOrderSelects();
+  } catch (err) {
+    console.error('Orders load error:', err);
+  }
+}
+function populateOrderSelects() {
+  if ($('report-order-select')) {
+    $('report-order-select').innerHTML = '<option value="">Pilih Pesanan</option>' + allOrders.map(o => '<option value="' + o.id + '">' + o.id + ' - ' + escHtml(o.tarikh) + ' (' + escHtml(o.namaPembuat) + ')</option>').join('');
+  }
+}
+let editingOrderItems = [];
+window._openEditOrder = async function(id) {
+  try {
+    const order = await apiFetch('/api/orders/' + id);
+    $('edit-order-id').value = order.id;
+    $('edit-order-date').value = order.tarikh;
+    $('edit-order-maker').value = order.namaPembuat;
+    $('edit-order-weeks').value = order.tempohMinggu || 0;
+    $('edit-order-notes').value = order.notes || '';
+    editingOrderItems = (order.items || []).map(it => ({ ...it }));
+    renderEditOrderItems();
+    $('edit-order-modal').classList.add('show');
+  } catch (err) { /* handled */ }
+};
+function renderEditOrderItems() {
+  const container = $('edit-order-items');
+  container.innerHTML = editingOrderItems.map((item, i) => `
+    <div class="order-item-row" data-idx="${i}">
+      <select onchange="window._updateEditItem(${i},'kod',this.value)" style="flex:2">
+        <option value="">Pilih SKU</option>
+        ${allSkus.map(s => '<option value="' + s.kod + '"' + (item.kod === s.kod ? ' selected' : '') + '>' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('')}
+      </select>
+      <input type="number" value="${item.qtyOrdered || 0}" min="0" style="flex:1" onchange="window._updateEditItem(${i},'qtyOrdered',parseInt(this.value)||0)" placeholder="Kuantiti">
+      <input type="text" value="${item.notes || ''}" style="flex:1" onchange="window._updateEditItem(${i},'notes',this.value)" placeholder="Nota">
+      <button class="btn-icon item-remove" onclick="window._removeEditItem(${i})" title="Padam">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+window._updateEditItem = function(idx, field, val) {
+  editingOrderItems[idx][field] = val;
+};
+window._removeEditItem = function(idx) {
+  editingOrderItems.splice(idx, 1);
+  renderEditOrderItems();
+};
+function initEditOrderModal() {
+  $('btn-add-edit-order-item').addEventListener('click', () => {
+    editingOrderItems.push({ kod: '', qtyOrdered: 0, notes: '', skuId: null });
+    renderEditOrderItems();
+  });
+  $('btn-update-order').addEventListener('click', async () => {
+    const id = $('edit-order-id').value;
+    const body = {
+      tarikh: $('edit-order-date').value,
+      namaPembuat: $('edit-order-maker').value.trim(),
+      tempohMinggu: parseInt($('edit-order-weeks').value) || 0,
+      notes: $('edit-order-notes').value.trim(),
+      items: editingOrderItems.filter(it => it.kod).map(it => ({
+        kod: it.kod,
+        skuId: it.skuId || null,
+        qtyOrdered: it.qtyOrdered || 0,
+        notes: it.notes || ''
+      }))
+    };
+    try {
+      await apiFetch('/api/orders/' + id, { method: 'PUT', body: JSON.stringify(body) });
+      showToast('Pesanan dikemaskini');
+      $('edit-order-modal').classList.remove('show');
+      loadOrders();
+    } catch (err) { /* handled */ }
+  });
+  $('btn-delete-order').addEventListener('click', async () => {
+    const id = $('edit-order-id').value;
+    $('confirm-message').textContent = 'Adakah anda pasti mahu memadam pesanan ini?';
+    $('confirm-modal').classList.add('show');
+    $('btn-confirm-yes').onclick = async function() {
+      try {
+        await apiFetch('/api/orders/' + id, { method: 'DELETE' });
+        $('confirm-modal').classList.remove('show');
+        $('edit-order-modal').classList.remove('show');
+        showToast('Pesanan dipadam');
+        loadOrders();
+      } catch (err) { /* handled */ }
+    };
+  });
+  $('order-search').addEventListener('input', async function() {
+    const q = this.value.toLowerCase();
+    const filtered = allOrders.filter(o => o.tarikh.includes(q) || o.namaPembuat.toLowerCase().includes(q) || String(o.id).includes(q));
+    const tbody = $('order-list-table').querySelector('tbody');
+    tbody.innerHTML = filtered.map(o => `<tr>
+      <td>${o.id}</td><td>${escHtml(o.tarikh)}</td><td>${escHtml(o.namaPembuat)}</td><td>${o.tempohMinggu || 0} minggu</td><td>-</td>
+      <td><button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button> <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button></td>
+    </tr>`).join('');
+  });
+}
+window._deleteOrder = function(id) {
+  $('confirm-message').textContent = 'Adakah anda pasti mahu memadam pesanan ini?';
+  $('confirm-modal').classList.add('show');
+  $('btn-confirm-yes').onclick = async function() {
+    try {
+      await apiFetch('/api/orders/' + id, { method: 'DELETE' });
+      $('confirm-modal').classList.remove('show');
+      showToast('Pesanan dipadam');
+      loadOrders();
+    } catch (err) { /* handled */ }
+  };
+};
+
+// ===== ORDER REPORT =====
+function initOrderReport() {
+  $('report-order-select').addEventListener('change', async function() {
+    const id = parseInt(this.value);
+    if (!id) {
+      $('order-report-content').innerHTML = '<div class="card-body"><div class="empty-state"><p>Pilih pesanan untuk melihat laporan</p></div></div>';
+      return;
+    }
+    try {
+      const order = await apiFetch('/api/orders/' + id);
+      const items = order.items || [];
+      let html = `<div class="card-body">
+        <div class="mb-16">
+          <strong>Pesanan #${order.id}</strong> &mdash; ${escHtml(order.tarikh)} &mdash; ${escHtml(order.namaPembuat)}<br>
+          <span style="color:var(--gray-500)">Tempoh: ${order.tempohMinggu || 0} minggu</span>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Kod</th><th>Nama</th><th>Kuantiti Dipesan</th><th>Nota</th></tr></thead><tbody>`;
+      for (const item of items) {
+        const sku = allSkus.find(s => s.id === item.skuId) || allSkus.find(s => s.kod === item.kod);
+        html += `<tr>
+          <td><code>${escHtml(item.kod)}</code></td>
+          <td>${sku ? escHtml(sku.nama) : '-'}</td>
+          <td class="text-right">${formatNum(item.qtyOrdered)}</td>
+          <td>${escHtml(item.notes || '')}</td>
+        </tr>`;
+      }
+      html += '</tbody></table></div></div>';
+      $('order-report-content').innerHTML = html;
+    } catch (err) { /* handled */ }
+  });
+}
+
+// ===== SKU REPORT =====
+function initSKUReport() {
+  loadSKUReport();
+  $('sku-report-group-filter').addEventListener('change', loadSKUReport);
+  $('sku-report-status-filter').addEventListener('change', loadSKUReport);
+  $('sku-report-enabled-filter').addEventListener('change', loadSKUReport);
+}
+function loadSKUReport() {
+  const groupId = $('sku-report-group-filter')?.value;
+  const statusFilter = $('sku-report-status-filter')?.value;
+  const enabledOnly = $('sku-report-enabled-filter')?.checked;
+  const filtered = allSkus.filter(s => {
+    if (enabledOnly && !s.enabled) return false;
+    if (groupId && s.groupId !== parseInt(groupId)) return false;
+    const st = determineStockStatus(s);
+    if (statusFilter && st !== statusFilter) return false;
+    return true;
+  });
+  const tbody = $('sku-report-table').querySelector('tbody');
+  tbody.innerHTML = filtered.map(sku => {
+    const grp = allGroups.find(g => g.id === sku.groupId);
+    const levels = calculateLevels(sku);
+    const status = determineStockStatus(sku);
+    const awu = levels.awu;
+    const weeksStock = awu > 0 ? ((sku.stokSemasa || 0) / awu).toFixed(1) : '-';
+    return `<tr>
+      <td><code>${escHtml(sku.kod)}</code></td>
+      <td>${escHtml(sku.nama)}</td>
+      <td>${grp ? escHtml(grp.name) : '-'}</td>
+      <td class="text-right">${formatNum(sku.stokSemasa)}</td>
+      <td class="text-right">${formatNum(levels.awu)}</td>
+      <td class="text-right">${formatNum(levels.min)}</td>
+      <td class="text-right">${formatNum(levels.penimbal)}</td>
+      <td class="text-right">${formatNum(levels.maks)}</td>
+      <td class="text-right">${weeksStock}</td>
+      <td>${statusBadge(status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== SETTINGS =====
+function initSettingsForm() {
+  $('btn-save-settings').addEventListener('click', async () => {
+    const body = {
+      appTitle: $('setting-app-title').value.trim(),
+      minWeeks: parseInt($('setting-min-weeks').value) || 2,
+      bufferWeeks: parseInt($('setting-buffer-weeks').value) || 4,
+      maxWeeks: parseInt($('setting-max-weeks').value) || 6,
+      defaultFilename: $('setting-filename').value.trim(),
+      layoutMode: $('setting-layout-mode').value
+    };
+    try {
+      await apiFetch('/api/settings', { method: 'PUT', body: JSON.stringify(body) });
+      appSettings = { ...appSettings, ...body };
+      document.title = body.appTitle;
+      $('app-title-display').textContent = body.appTitle;
+      showToast('Tetapan disimpan');
+    } catch (err) { /* handled */ }
+  });
+}
+function loadSettingsForm() {
+  $('setting-app-title').value = appSettings.appTitle || '';
+  $('setting-min-weeks').value = appSettings.minWeeks || 2;
+  $('setting-buffer-weeks').value = appSettings.bufferWeeks || 4;
+  $('setting-max-weeks').value = appSettings.maxWeeks || 6;
+  $('setting-filename').value = appSettings.defaultFilename || '';
+  $('setting-layout-mode').value = appSettings.layoutMode || 'table';
+}
+
+// ===== SYNC =====
+function initSyncPage() {
+  $('btn-export-db').addEventListener('click', async () => {
+    try {
+      const data = await apiFetch('/api/export');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (appSettings.defaultFilename || 'substor') + '_' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Data dieksport');
+    } catch (err) { /* handled */ }
+  });
+  $('btn-import-db').addEventListener('click', () => {
+    $('import-file-input').click();
+  });
+  $('import-file-input').addEventListener('change', async function() {
+    const file = this.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!confirm('Import akan menggantikan semua data sedia ada. Teruskan?')) return;
+      const result = await apiFetch('/api/import', { method: 'POST', body: JSON.stringify(data) });
+      showCustomAlert('Import Berjaya', `Berjaya import: ${result.counts.settings} tetapan, ${result.counts.groups} kumpulan, ${result.counts.skus} SKU, ${result.counts.orders} pesanan, ${result.counts.orderItems} item pesanan.`);
+      loadApp();
+    } catch (err) {
+      showCustomAlert('Ralat Import', err.message);
+    }
+    this.value = '';
+  });
+  $('btn-import-excel').addEventListener('click', () => {
+    $('excel-file-input').click();
+  });
+  $('excel-file-input').addEventListener('change', async function() {
+    const file = this.files[0];
+    if (!file) return;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      if (typeof XLSX === 'undefined') {
+        showCustomAlert('Ralat', 'SheetJS belum dimuat turun. Sila muat turun xlsx.js.');
+        return;
+      }
+      const wb = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+      const result = await apiFetch('/api/import-excel', {
+        method: 'POST',
+        body: JSON.stringify({ filename: file.name, rows })
+      });
+      let html = `<p><strong>Import Excel Berjaya</strong></p>
+        <p>Dikemaskini: ${result.updated} item</p>
+        <p>Tidak dijumpai: ${result.notFound} item</p>`;
+      if (result.unmatched && result.unmatched.length > 0) {
+        html += '<p style="margin-top:8px"><strong>Tidak dijumpai:</strong></p><ul style="font-size:13px;margin-left:16px">';
+        result.unmatched.forEach(u => { html += '<li>' + escHtml(u.kod) + ' - ' + escHtml(u.nama) + '</li>'; });
+        html += '</ul>';
+      }
+      showCustomAlertHTML('Keputusan Import Excel', html);
+      loadSkus();
+      loadDashboard();
+    } catch (err) {
+      showCustomAlert('Ralat Import Excel', err.message);
+    }
+    this.value = '';
+  });
+}
+
+// ===== TABLE KEYBOARD SCROLLING =====
+function initTableKeyboardScrolling() {
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    const focused = document.querySelector('.table-scroll:focus, table:focus');
+    if (focused) {
+      if (e.key === 'ArrowDown') { focused.scrollTop += 30; e.preventDefault(); }
+      if (e.key === 'ArrowUp') { focused.scrollTop -= 30; e.preventDefault(); }
+    }
+  });
+}
+
+// ===== FOOTER CLOCK =====
+function updateClock() {
+  const now = new Date();
+  const str = now.toLocaleString('ms-MY', { dateStyle: 'medium', timeStyle: 'short' });
+  $('footer-clock').textContent = str;
+  $('clock-display').textContent = str;
+}
+setInterval(updateClock, 10000);
+
+// ===== DASHBOARD SEARCH =====
+function initDashboardSearch() {
+  // Reserved for future global search
+}
+
+// ===== INIT =====
+async function loadApp() {
+  try {
+    appSettings = await apiFetch('/api/settings');
+    $('app-title-display').textContent = appSettings.appTitle || 'Sistem Inventori Prabungkus Hospital Keningau';
+    document.title = appSettings.appTitle || 'Sistem Inventori Prabungkus Hospital Keningau';
+    $('sidebar-title').textContent = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+  } catch (err) {
+    console.error('Settings load error:', err);
+    appSettings = { minWeeks: 2, bufferWeeks: 4, maxWeeks: 6, appTitle: 'Sistem Inventori Prabungkus Hospital Keningau' };
+  }
+  await loadDashboard();
+  await loadSkus();
+  await loadGroups();
+  await loadOrders();
+  loadSettingsForm();
+  updateClock();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initModalClosers();
+  initNavigation();
+  initSKUEvents();
+  initGroupEvents();
+  initCreateOrderModal();
+  initEditOrderModal();
+  initOrderReport();
+  initSKUReport();
+  initSettingsForm();
+  initSyncPage();
+  initTableKeyboardScrolling();
+  loadApp();
+  navigateTo('dashboard');
+});
+
+})();
+</script>
+</body>
+</html>

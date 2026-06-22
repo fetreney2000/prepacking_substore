@@ -1,0 +1,10 @@
+{
+  "name": "sistem-inventori-prabungkus",
+  "type": "module",
+  "dependencies": {
+    "mongoose": "^8.0.0"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
