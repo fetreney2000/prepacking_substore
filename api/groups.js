@@ -16,9 +16,9 @@ async function getNextId(Model) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const Group = getGroupModel();
   try {
+    await dbConnect();
+    const Group = getGroupModel();
     switch (req.method) {
       case 'GET': {
         const groups = await Group.find().sort({ name: 1 }).lean();

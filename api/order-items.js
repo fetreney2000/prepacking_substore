@@ -11,9 +11,9 @@ function formatDoc(doc) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const OrderItem = getOrderItemModel();
   try {
+    await dbConnect();
+    const OrderItem = getOrderItemModel();
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Method not allowed' });
     }

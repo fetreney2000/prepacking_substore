@@ -16,9 +16,9 @@ async function getNextId(Model) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const SKU = getSKUModel();
   try {
+    await dbConnect();
+    const SKU = getSKUModel();
     switch (req.method) {
       case 'GET': {
         const { groupId } = req.query;

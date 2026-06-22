@@ -11,14 +11,13 @@ function formatDoc(doc) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const SKU = getSKUModel();
-  const OrderItem = getOrderItemModel();
-  const { id } = req.query;
-  const numId = parseInt(id);
-  if (isNaN(numId)) return res.status(400).json({ error: 'ID tidak sah' });
-
   try {
+    await dbConnect();
+    const SKU = getSKUModel();
+    const OrderItem = getOrderItemModel();
+    const { id } = req.query;
+    const numId = parseInt(id);
+    if (isNaN(numId)) return res.status(400).json({ error: 'ID tidak sah' });
     switch (req.method) {
       case 'GET': {
         const sku = await SKU.findById(numId).lean();

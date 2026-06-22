@@ -11,9 +11,9 @@ function formatDoc(doc) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const Setting = getSettingModel();
   try {
+    await dbConnect();
+    const Setting = getSettingModel();
     switch (req.method) {
       case 'GET': {
         let settings = await Setting.findById(3).lean();

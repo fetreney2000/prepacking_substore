@@ -16,11 +16,11 @@ async function getNextId(Model) {
 }
 
 export default async function handler(req, res) {
-  await dbConnect();
-  const Order = getOrderModel();
-  const OrderItem = getOrderItemModel();
-  const SKU = getSKUModel();
   try {
+    await dbConnect();
+    const Order = getOrderModel();
+    const OrderItem = getOrderItemModel();
+    const SKU = getSKUModel();
     switch (req.method) {
       case 'GET': {
         const orders = await Order.find().sort({ tarikh: -1 }).lean();

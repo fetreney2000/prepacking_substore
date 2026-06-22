@@ -3,10 +3,9 @@ import { getSKUModel } from '../lib/_schemas.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  await dbConnect();
-  const SKU = getSKUModel();
-
   try {
+    await dbConnect();
+    const SKU = getSKUModel();
     const { filename, rows } = req.body;
     if (!rows || !Array.isArray(rows)) {
       return res.status(400).json({ error: 'Data baris tidak sah' });

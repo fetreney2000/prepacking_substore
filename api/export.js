@@ -3,14 +3,13 @@ import { getSettingModel, getGroupModel, getSKUModel, getOrderModel, getOrderIte
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-  await dbConnect();
-  const Setting = getSettingModel();
-  const Group = getGroupModel();
-  const SKU = getSKUModel();
-  const Order = getOrderModel();
-  const OrderItem = getOrderItemModel();
-
   try {
+    await dbConnect();
+    const Setting = getSettingModel();
+    const Group = getGroupModel();
+    const SKU = getSKUModel();
+    const Order = getOrderModel();
+    const OrderItem = getOrderItemModel();
     const settingsArr = await Setting.find().lean();
     const groups = await Group.find().lean();
     const skus = await SKU.find().lean();
