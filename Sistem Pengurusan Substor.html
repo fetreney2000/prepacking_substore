@@ -348,7 +348,7 @@ select[multiple]{min-height:80px}
       <div class="form-row">
         <div class="form-group">
           <label>Tempoh (Minggu)</label>
-          <input type="number" id="create-order-weeks" value="4" min="1" max="12">
+          <input type="number" id="create-order-weeks" value="0" min="0" max="12">
         </div>
         <div class="form-group">
           <label>Nota</label>
@@ -357,12 +357,6 @@ select[multiple]{min-height:80px}
       </div>
       <h3 style="margin:20px 0 12px;font-size:16px">Item Pesanan</h3>
       <div id="create-order-items"></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-outline btn-sm" id="btn-add-order-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14m-7-7h14"/></svg>
-          Tambah Item
-        </button>
-      </div>
       <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:8px">
         <button class="btn btn-primary" id="btn-save-order">Simpan Pesanan</button>
       </div>
@@ -844,8 +838,9 @@ function statusBadge(status) {
 // ===== MODAL CLOSERS =====
 function initModalClosers() {
   document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal-close')) {
-      const id = e.target.dataset.modal || e.target.closest('.modal-overlay')?.id;
+    const closeBtn = e.target.closest('.modal-close');
+    if (closeBtn) {
+      const id = closeBtn.dataset.modal || closeBtn.closest('.modal-overlay')?.id;
       if (id) $(id).classList.remove('show');
     }
   });
@@ -865,6 +860,12 @@ function initNavigation() {
       $$('.page').forEach(p => p.classList.remove('active'));
       const page = $('page-' + btn.dataset.page);
       if (page) page.classList.add('active');
+      if (btn.dataset.page === 'create-order') {
+        $('create-order-date').value = new Date().toISOString().slice(0, 10);
+        $('create-order-weeks').value = '0';
+        createOrderItems = [];
+        renderCreateOrderItems();
+      }
     });
   });
 }
@@ -1174,40 +1175,57 @@ function initGroupEvents() {
 
 // ===== CREATE ORDER =====
 let createOrderItems = [];
+function calculateOrderQty(sku, tempohMinggu) {
+  const awu = calculateAWU(sku);
+  const needed = (awu * tempohMinggu) - (sku.stokSemasa || 0);
+  if (needed <= 0) return 0;
+  return roundToPackSize(needed, sku.saizPek || 1);
+}
 function renderCreateOrderItems() {
   const container = $('create-order-items');
-  container.innerHTML = createOrderItems.map((item, i) => `
-    <div class="order-item-row" data-idx="${i}">
-      <select onchange="window._updateCreateItem(${i},'kod',this.value)" style="flex:2">
-        <option value="">Pilih SKU</option>
-        ${allSkus.filter(s => s.enabled).map(s => '<option value="' + s.kod + '"' + (item.kod === s.kod ? ' selected' : '') + '>' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('')}
-      </select>
-      <input type="number" value="${item.qtyOrdered || 0}" min="0" style="flex:1" onchange="window._updateCreateItem(${i},'qtyOrdered',parseInt(this.value)||0)" placeholder="Kuantiti">
-      <input type="text" value="${item.notes || ''}" style="flex:1" onchange="window._updateCreateItem(${i},'notes',this.value)" placeholder="Nota">
-      <button class="btn-icon item-remove" onclick="window._removeCreateItem(${i})" title="Padam">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
-    </div>
-  `).join('');
+  const tempoh = parseInt($('create-order-weeks').value) || 0;
+  createOrderItems = allSkus.filter(s => s.enabled).map(sku => {
+    const existing = createOrderItems.find(c => c.kod === sku.kod);
+    const qty = tempoh > 0 ? calculateOrderQty(sku, tempoh) : (existing ? existing.qtyOrdered : 0);
+    return { kod: sku.kod, nama: sku.nama, qtyOrdered: qty, notes: existing ? existing.notes : '' };
+  });
+  container.innerHTML = createOrderItems.length === 0
+    ? '<p style="color:#6b7280">Tiada SKU aktif.</p>'
+    : '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+      '<thead><tr>' +
+      '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;width:40%">Kod & Nama</th>' +
+      '<th style="text-align:center;padding:6px 8px;border-bottom:2px solid #e5e7eb">AWU</th>' +
+      '<th style="text-align:center;padding:6px 8px;border-bottom:2px solid #e5e7eb">Stok</th>' +
+      '<th style="text-align:center;padding:6px 8px;border-bottom:2px solid #e5e7eb">Kuantiti</th>' +
+      '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb">Nota</th>' +
+      '</tr></thead><tbody>' +
+      createOrderItems.map((item, i) => {
+        const sku = allSkus.find(s => s.kod === item.kod);
+        const awu = sku ? Math.round(calculateAWU(sku)) : 0;
+        return '<tr>' +
+          '<td style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><code>' + escHtml(item.kod) + '</code> ' + escHtml(item.nama) + '</td>' +
+          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + awu + '</td>' +
+          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + (sku ? (sku.stokSemasa || 0) : 0) + '</td>' +
+          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="number" value="' + item.qtyOrdered + '" min="0" style="width:80px;padding:4px;text-align:center;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'qtyOrdered\',parseInt(this.value)||0)"></td>' +
+          '<td style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="text" value="' + escHtml(item.notes) + '" style="width:100%;padding:4px;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'notes\',this.value)" placeholder="Nota"></td>' +
+          '</tr>';
+      }).join('') +
+      '</tbody></table>';
 }
 window._updateCreateItem = function(idx, field, val) {
   createOrderItems[idx][field] = val;
 };
-window._removeCreateItem = function(idx) {
-  createOrderItems.splice(idx, 1);
-  renderCreateOrderItems();
-};
 function initCreateOrderModal() {
-  $('btn-add-order-item').addEventListener('click', () => {
-    createOrderItems.push({ kod: '', qtyOrdered: 0, notes: '' });
+  $('create-order-date').value = new Date().toISOString().slice(0, 10);
+  $('create-order-weeks').addEventListener('input', () => {
     renderCreateOrderItems();
   });
   $('btn-save-order').addEventListener('click', async () => {
     const tarikh = $('create-order-date').value;
     const namaPembuat = $('create-order-maker').value.trim();
-    const tempohMinggu = parseInt($('create-order-weeks').value) || 4;
+    const tempohMinggu = parseInt($('create-order-weeks').value) || 0;
     const notes = $('create-order-notes').value.trim();
-    const items = createOrderItems.filter(it => it.kod && it.qtyOrdered > 0);
+    const items = createOrderItems.filter(it => it.qtyOrdered > 0);
     if (!tarikh) return showCustomAlert('Ralat', 'Tarikh diperlukan');
     if (!namaPembuat) return showCustomAlert('Ralat', 'Nama pembuat diperlukan');
     try {
@@ -1216,10 +1234,11 @@ function initCreateOrderModal() {
         body: JSON.stringify({ tarikh, namaPembuat, tempohMinggu, notes, items })
       });
       showToast('Pesanan dicipta');
+      $('create-order-date').value = new Date().toISOString().slice(0, 10);
+      $('create-order-notes').value = '';
+      $('create-order-weeks').value = '0';
       createOrderItems = [];
       renderCreateOrderItems();
-      $('create-order-date').value = '';
-      $('create-order-notes').value = '';
       loadOrders();
     } catch (err) { /* handled */ }
   });
