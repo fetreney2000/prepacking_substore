@@ -173,6 +173,18 @@ select[multiple]{min-height:80px}
 .table-scroll{overflow-x:auto;max-height:500px;overflow-y:auto}
 .highlight{background:#fef08a}
 
+/* Mobile card layout for tables */
+@media(max-width:768px){
+  .table-wrap table thead{display:none}
+  .table-wrap table tbody tr{display:block;padding:12px;margin-bottom:10px;border:1px solid var(--gray-200);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+  .table-wrap table tbody td{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
+  .table-wrap table tbody td:last-child{border-bottom:none}
+  .table-wrap table tbody td::before{content:attr(data-label);font-weight:600;color:var(--gray-500);font-size:12px;min-width:120px;flex-shrink:0}
+  .table-wrap table tbody td.text-right{text-align:right}
+  #low-stock-table,#sku-report-table,#sku-table,#group-table,#order-list-table,#sku-table,#order-report-content table{font-size:13px}
+  .order-report-content table{display:block}
+}
+
 /* Loading overlay */
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
 .loading-overlay.show{display:flex}
@@ -994,12 +1006,12 @@ async function loadDashboard() {
         const levels = calculateLevels(sku);
         const status = determineStockStatus(sku);
         return `<tr>
-          <td><code>${escHtml(sku.kod)}</code></td>
-          <td>${escHtml(sku.nama)}</td>
-          <td>${grp ? escHtml(grp.name) : '-'}</td>
-          <td class="text-right">${formatNum(sku.stokSemasa)}</td>
-          <td class="text-right">${formatNum(levels.min)}</td>
-          <td>${statusBadge(status)}</td>
+          <td data-label="Kod"><code>${escHtml(sku.kod)}</code></td>
+          <td data-label="Nama">${escHtml(sku.nama)}</td>
+          <td data-label="Kumpulan">${grp ? escHtml(grp.name) : '-'}</td>
+          <td data-label="Stok" class="text-right">${formatNum(sku.stokSemasa)}</td>
+          <td data-label="Min" class="text-right">${formatNum(levels.min)}</td>
+          <td data-label="Status">${statusBadge(status)}</td>
         </tr>`;
       }).join('');
     }
@@ -1039,16 +1051,16 @@ function renderSkus() {
       const levels = calculateLevels(sku);
       const status = determineStockStatus(sku);
       return `<tr>
-        <td><code class="text-truncate">${escHtml(sku.kod)}</code></td>
-        <td class="text-truncate">${escHtml(sku.nama)}</td>
-        <td>${grp ? escHtml(grp.name) : '-'}</td>
-        <td class="text-right">${formatNum(sku.stokSemasa)}</td>
-        <td class="text-right">${formatNum(levels.awu)}</td>
-        <td class="text-right">${formatNum(levels.min)}</td>
-        <td class="text-right">${formatNum(levels.penimbal)}</td>
-        <td class="text-right">${formatNum(levels.maks)}</td>
-        <td>${statusBadge(status)}</td>
-        <td>
+        <td data-label="Kod"><code class="text-truncate">${escHtml(sku.kod)}</code></td>
+        <td data-label="Nama" class="text-truncate">${escHtml(sku.nama)}</td>
+        <td data-label="Kumpulan">${grp ? escHtml(grp.name) : '-'}</td>
+        <td data-label="Stok" class="text-right">${formatNum(sku.stokSemasa)}</td>
+        <td data-label="AWU" class="text-right">${formatNum(levels.awu)}</td>
+        <td data-label="Min" class="text-right">${formatNum(levels.min)}</td>
+        <td data-label="Penimbal" class="text-right">${formatNum(levels.penimbal)}</td>
+        <td data-label="Maks" class="text-right">${formatNum(levels.maks)}</td>
+        <td data-label="Status">${statusBadge(status)}</td>
+        <td data-label="Aksi">
           <button class="btn-icon" onclick="window._editSku(${sku.id})" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
           <button class="btn-icon" onclick="window._deleteSku(${sku.id})" title="Padam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </td>
@@ -1192,11 +1204,11 @@ async function loadGroups() {
     tbody.innerHTML = allGroups.map(g => {
       const skuCount = allSkus.filter(s => s.groupId === g.id).length;
       return `<tr>
-        <td>${g.id}</td>
-        <td>${escHtml(g.name)}</td>
-        <td>${escHtml(g.notes || '')}</td>
-        <td>${skuCount}</td>
-        <td>
+        <td data-label="ID">${g.id}</td>
+        <td data-label="Nama">${escHtml(g.name)}</td>
+        <td data-label="Nota">${escHtml(g.notes || '')}</td>
+        <td data-label="SKU">${skuCount}</td>
+        <td data-label="Aksi">
           <button class="btn-icon" onclick="window._editGroup(${g.id})" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
           <button class="btn-icon" onclick="window._deleteGroup(${g.id})" title="Padam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </td>
@@ -1339,12 +1351,12 @@ async function loadOrders() {
     tbody.innerHTML = allOrders.map(o => {
       const itemCount = o.items ? o.items.length : (o.itemCount || '-');
       return `<tr>
-        <td>${o.id}</td>
-        <td>${escHtml(o.tarikh)}</td>
-        <td>${escHtml(o.namaPembuat)}</td>
-        <td>${o.tempohMinggu || 0} minggu</td>
-        <td>${typeof itemCount === 'number' ? itemCount + ' item' : itemCount}</td>
-        <td>
+        <td data-label="ID">${o.id}</td>
+        <td data-label="Tarikh">${escHtml(o.tarikh)}</td>
+        <td data-label="Pembuat">${escHtml(o.namaPembuat)}</td>
+        <td data-label="Tempoh">${o.tempohMinggu || 0} minggu</td>
+        <td data-label="Item">${typeof itemCount === 'number' ? itemCount + ' item' : itemCount}</td>
+        <td data-label="Aksi">
           <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button>
           <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button>
         </td>
@@ -1392,6 +1404,20 @@ function renderEditOrderItems() {
 }
 window._updateEditItem = function(idx, field, val) {
   editingOrderItems[idx][field] = val;
+  // Auto-calculate qty when SKU is selected
+  if (field === 'kod' && val) {
+    const sku = allSkus.find(s => s.kod === val);
+    if (sku) {
+      editingOrderItems[idx].skuId = sku.id;
+      const tempoh = parseInt($('edit-order-weeks').value) || 0;
+      if (tempoh > 0) {
+        const qty = calculateOrderQty(sku, tempoh);
+        editingOrderItems[idx].qtyOrdered = qty;
+        renderEditOrderItems();
+        return;
+      }
+    }
+  }
 };
 window._removeEditItem = function(idx) {
   editingOrderItems.splice(idx, 1);
@@ -1399,8 +1425,18 @@ window._removeEditItem = function(idx) {
 };
 function initEditOrderModal() {
   $('btn-add-edit-order-item').addEventListener('click', () => {
-    editingOrderItems.push({ kod: '', qtyOrdered: 0, notes: '', skuId: null });
+    const tempoh = parseInt($('edit-order-weeks').value) || 0;
+    const newItem = { kod: '', qtyOrdered: 0, notes: '', skuId: null };
+    if (tempoh > 0) {
+      newItem._tempoh = tempoh;
+    }
+    editingOrderItems.push(newItem);
     renderEditOrderItems();
+    // Auto-select the first empty item and show a select dropdown
+    setTimeout(() => {
+      const selects = $('edit-order-items').querySelectorAll('select');
+      if (selects.length > 0) selects[selects.length - 1].focus();
+    }, 50);
   });
   $('btn-update-order').addEventListener('click', async () => {
     const id = $('edit-order-id').value;
@@ -1481,10 +1517,10 @@ function initOrderReport() {
       for (const item of items) {
         const sku = allSkus.find(s => s.id === item.skuId) || allSkus.find(s => s.kod === item.kod);
         html += `<tr>
-          <td><code>${escHtml(item.kod)}</code></td>
-          <td>${sku ? escHtml(sku.nama) : '-'}</td>
-          <td class="text-right">${formatNum(item.qtyOrdered)}</td>
-          <td>${escHtml(item.notes || '')}</td>
+          <td data-label="Kod"><code>${escHtml(item.kod)}</code></td>
+          <td data-label="Nama">${sku ? escHtml(sku.nama) : '-'}</td>
+          <td data-label="Kuantiti" class="text-right">${formatNum(item.qtyOrdered)}</td>
+          <td data-label="Nota">${escHtml(item.notes || '')}</td>
         </tr>`;
       }
       html += '</tbody></table></div></div>';
@@ -1493,7 +1529,11 @@ function initOrderReport() {
   });
   // Print order report
   $('btn-print-order-report').addEventListener('click', () => {
-    window.print();
+    $('page-order-report').classList.add('print-target');
+    setTimeout(() => {
+      window.print();
+      $('page-order-report').classList.remove('print-target');
+    }, 100);
   });
 }
 
@@ -1503,6 +1543,13 @@ function initSKUReport() {
   $('sku-report-group-filter').addEventListener('change', loadSKUReport);
   $('sku-report-status-filter').addEventListener('change', loadSKUReport);
   $('sku-report-enabled-filter').addEventListener('change', loadSKUReport);
+  $('btn-print-sku-report').addEventListener('click', () => {
+    $('page-sku-report').classList.add('print-target');
+    setTimeout(() => {
+      window.print();
+      $('page-sku-report').classList.remove('print-target');
+    }, 100);
+  });
 }
 function loadSKUReport() {
   const groupId = $('sku-report-group-filter')?.value;
@@ -1523,16 +1570,16 @@ function loadSKUReport() {
     const awu = levels.awu;
     const weeksStock = awu > 0 ? ((sku.stokSemasa || 0) / awu).toFixed(1) : '-';
     return `<tr>
-      <td><code>${escHtml(sku.kod)}</code></td>
-      <td>${escHtml(sku.nama)}</td>
-      <td>${grp ? escHtml(grp.name) : '-'}</td>
-      <td class="text-right">${formatNum(sku.stokSemasa)}</td>
-      <td class="text-right">${formatNum(levels.awu)}</td>
-      <td class="text-right">${formatNum(levels.min)}</td>
-      <td class="text-right">${formatNum(levels.penimbal)}</td>
-      <td class="text-right">${formatNum(levels.maks)}</td>
-      <td class="text-right">${weeksStock}</td>
-      <td>${statusBadge(status)}</td>
+      <td data-label="Kod"><code>${escHtml(sku.kod)}</code></td>
+      <td data-label="Nama">${escHtml(sku.nama)}</td>
+      <td data-label="Kumpulan">${grp ? escHtml(grp.name) : '-'}</td>
+      <td data-label="Stok" class="text-right">${formatNum(sku.stokSemasa)}</td>
+      <td data-label="AWU" class="text-right">${formatNum(levels.awu)}</td>
+      <td data-label="Min" class="text-right">${formatNum(levels.min)}</td>
+      <td data-label="Penimbal" class="text-right">${formatNum(levels.penimbal)}</td>
+      <td data-label="Maks" class="text-right">${formatNum(levels.maks)}</td>
+      <td data-label="Minggu" class="text-right">${weeksStock}</td>
+      <td data-label="Status">${statusBadge(status)}</td>
     </tr>`;
   }).join('');
 }
