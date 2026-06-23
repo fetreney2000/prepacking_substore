@@ -460,52 +460,57 @@ select[multiple]{min-height:80px}
 <div class="page" id="page-order-report">
   <div class="page-header">
     <h2>Laporan Pesanan</h2>
-    <button class="btn btn-outline btn-sm" id="btn-print-order-report">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-      Cetak
-    </button>
   </div>
-  <div class="filter-bar">
-    <select id="report-order-select"><option value="">Pilih Pesanan</option></select>
-  </div>
-  <div id="order-report-content" class="card">
+  <div class="card mb-16">
     <div class="card-body">
-      <div class="empty-state"><p>Pilih pesanan untuk melihat laporan</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:150px">
+          <label>Dari</label>
+          <input type="date" id="report-date-from">
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:150px">
+          <label>Hingga</label>
+          <input type="date" id="report-date-to">
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:150px">
+          <label>Nama Pembuat</label>
+          <input type="text" id="report-pembuat-filter" placeholder="Nama pembuat...">
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:2;min-width:200px">
+          <label>Item</label>
+          <select id="report-sku-filter"><option value="">-- Semua SKU --</option></select>
+        </div>
+        <button class="btn btn-primary" id="btn-generate-order-report">Jana Laporan</button>
+      </div>
     </div>
   </div>
+  <div id="order-report-content"></div>
 </div>
 
 <!-- ========== SKU REPORT ========== -->
 <div class="page" id="page-sku-report">
   <div class="page-header">
     <h2>Laporan SKU</h2>
-    <button class="btn btn-outline btn-sm" id="btn-print-sku-report">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-      Cetak
-    </button>
   </div>
-  <div class="filter-bar">
-    <select id="sku-report-group-filter"><option value="">Semua Kumpulan</option></select>
-    <select id="sku-report-status-filter"><option value="">Semua Status</option>
-      <option value="ok">OK</option><option value="low">Rendah</option><option value="critical">Kritikal</option><option value="out">Kehabisan</option>
-    </select>
-    <label class="form-check" style="font-size:13px">
-      <input type="checkbox" id="sku-report-enabled-filter" checked> Aktif sahaja
-    </label>
-  </div>
-  <div class="card">
-    <div class="card-body" style="padding:0">
-      <div class="table-scroll">
-        <table id="sku-report-table">
-          <thead><tr>
-            <th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok</th><th>AWU</th>
-            <th>Min</th><th>Penimbal</th><th>Maks</th><th>Minggu Stok</th><th>Status</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
+  <div class="card mb-16">
+    <div class="card-body">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px">
+          <label>Status</label>
+          <select id="sku-status-filter">
+            <option value="">-- Semua --</option>
+            <option value="critical">Tiada Stok / Kritikal</option>
+            <option value="low">Amaran / Hampir Habis</option>
+            <option value="ok">Baik / Stok Mencukupi</option>
+            <option value="out">Kehabisan</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="btn-generate-sku-report">Jana Laporan</button>
+        <button class="btn btn-outline" id="sku-report-print-btn">Cetak</button>
       </div>
     </div>
   </div>
+  <div id="sku-report-container"></div>
 </div>
 
 <!-- ========== SETTINGS ========== -->
@@ -641,6 +646,9 @@ select[multiple]{min-height:80px}
 </footer>
 </div>
 </div>
+
+<!-- Print container (hidden, used for popup print) -->
+<div id="print-container" style="display:none"></div>
 
 <!-- ========== MODALS ========== -->
 
@@ -1349,28 +1357,26 @@ async function loadOrders() {
     allOrders = await apiFetch('/api/orders');
     const tbody = $('order-list-table').querySelector('tbody');
     tbody.innerHTML = allOrders.map(o => {
-      const itemCount = o.items ? o.items.length : (o.itemCount || '-');
+      const itemCount = o.itemCount || 0;
       return `<tr>
         <td data-label="ID">${o.id}</td>
         <td data-label="Tarikh">${escHtml(o.tarikh)}</td>
         <td data-label="Pembuat">${escHtml(o.namaPembuat)}</td>
         <td data-label="Tempoh">${o.tempohMinggu || 0} minggu</td>
-        <td data-label="Item">${typeof itemCount === 'number' ? itemCount + ' item' : itemCount}</td>
+        <td data-label="Item">${itemCount} item</td>
         <td data-label="Aksi">
+          <button class="btn btn-outline btn-sm" onclick="buildPrintView(${o.id})">Cetak</button>
           <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button>
           <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button>
         </td>
       </tr>`;
     }).join('');
-    populateOrderSelects();
   } catch (err) {
     console.error('Orders load error:', err);
   }
 }
 function populateOrderSelects() {
-  if ($('report-order-select')) {
-    $('report-order-select').innerHTML = '<option value="">Pilih Pesanan</option>' + allOrders.map(o => '<option value="' + o.id + '">' + o.id + ' - ' + escHtml(o.tarikh) + ' (' + escHtml(o.namaPembuat) + ')</option>').join('');
-  }
+  // Kept for compatibility but no longer used in order report
 }
 let editingOrderItems = [];
 window._openEditOrder = async function(id) {
@@ -1497,91 +1503,272 @@ window._deleteOrder = function(id) {
 };
 
 // ===== ORDER REPORT =====
+function getReportDocumentCSS(extraCSS) {
+  return `*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Segoe UI",Arial,sans-serif;font-size:11pt;color:#1E293B;padding:16px;background:#fff}table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10pt}th,td{border:1px solid #C0D4E8;padding:4px 6px;text-align:left;vertical-align:top}thead tr{background:#E6EFF8}tbody tr:nth-child(even):not(.group-header){background:#F8FAFF}tr.group-header td{background:#1E3A8A;color:#fff;padding:4px 6px;font-weight:700}code{font-family:"Cascadia Code",Consolas,monospace;font-size:9pt}.col-hidden{display:none!important}.label-with-icon{display:inline-flex;align-items:center;gap:6px}.toggle-switch{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border:1px solid #C0D4E8;border-radius:6px;background:#F8FAFF;font-size:10pt;user-select:none}.toggle-switch input{display:none}.toggle-slider{width:36px;height:20px;background:#CBD5E1;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.toggle-switch input:checked+.toggle-slider{background:#1E3A8A}.toggle-switch input:checked+.toggle-slider::after{transform:translateX(16px)}.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.print-actions{text-align:center;margin:16px 0}.print-actions button{padding:8px 20px;margin:0 6px;font-size:11pt;cursor:pointer;border:none;border-radius:4px;display:inline-flex;align-items:center;justify-content:center}.btn-print{background:#1E3A8A;color:#fff}.btn-close{background:#6B7280;color:#fff}${extraCSS||''}@media print{.col-toggle-bar,.print-actions,.no-print{display:none!important}.col-hidden{display:none!important}}`;
+}
 function initOrderReport() {
-  $('report-order-select').addEventListener('change', async function() {
-    const id = parseInt(this.value);
-    if (!id) {
-      $('order-report-content').innerHTML = '<div class="card-body"><div class="empty-state"><p>Pilih pesanan untuk melihat laporan</p></div></div>';
+  // Populate SKU dropdown for filter
+  if ($('report-sku-filter')) {
+    const opts = '<option value="">-- Semua SKU --</option>' + allSkus.filter(s => s.enabled !== false).sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).map(s => '<option value="' + s.id + '">' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('');
+    $('report-sku-filter').innerHTML = opts;
+  }
+  $('btn-generate-order-report').addEventListener('click', async () => {
+    const dateFrom = $('report-date-from').value;
+    const dateTo = $('report-date-to').value;
+    const skuFilter = $('report-sku-filter')?.value;
+    const pembuatFilter = ($('report-pembuat-filter')?.value || '').trim().toLowerCase();
+
+    // Fetch orders via API
+    let orders = await apiFetch('/api/orders');
+    if (dateFrom) orders = orders.filter(o => (o.tarikh || '').substring(0, 10) >= dateFrom);
+    if (dateTo) orders = orders.filter(o => (o.tarikh || '').substring(0, 10) <= dateTo);
+    if (pembuatFilter) orders = orders.filter(o => (o.namaPembuat || '').toLowerCase().includes(pembuatFilter));
+
+    // Fetch all order items
+    let allItems = [];
+    for (const order of orders) {
+      const orderData = await apiFetch('/api/orders/' + order.id);
+      (orderData.items || []).forEach(item => {
+        allItems.push({ ...item, _order: order });
+      });
+    }
+
+    // Filter by SKU if needed
+    if (skuFilter) {
+      const filterSku = allSkus.find(s => String(s.id) === String(skuFilter));
+      if (filterSku) {
+        allItems = allItems.filter(item => {
+          if (item.skuId != null) return String(item.skuId) === String(filterSku.id);
+          return (item.kod || '').toLowerCase() === (filterSku.kod || '').toLowerCase();
+        });
+      }
+    }
+
+    const container = $('order-report-content');
+    if (allItems.length === 0) {
+      container.innerHTML = '<div class="card"><div class="card-body"><div class="empty-state"><p>Tiada rekod dijumpai untuk penapis yang dipilih.</p></div></div></div>';
       return;
     }
-    try {
-      const order = await apiFetch('/api/orders/' + id);
-      const items = order.items || [];
-      let html = `<div class="card-body">
-        <div class="mb-16">
-          <strong>Pesanan #${order.id}</strong> &mdash; ${escHtml(order.tarikh)} &mdash; ${escHtml(order.namaPembuat)}<br>
-          <span style="color:var(--gray-500)">Tempoh: ${order.tempohMinggu || 0} minggu</span>
+
+    const orderMap = {};
+    orders.forEach(o => { orderMap[o.id] = o; });
+
+    const cols = [
+      { id: 'rc-tarikh', label: 'Tarikh' },
+      { id: 'rc-pembuat', label: 'Pembuat' },
+      { id: 'rc-kod', label: 'Kod' },
+      { id: 'rc-nama', label: 'Nama' },
+      { id: 'rc-kumpulan', label: 'Kumpulan' },
+      { id: 'rc-qty', label: 'Kuantiti' }
+    ];
+
+    const toggleBar = `<div class="col-toggle-bar" style="margin-bottom:8px;">${cols.map((c, idx) => `<label class="toggle-switch"><input type="checkbox" ${idx===0?'':'checked'} onchange="document.querySelectorAll('.${c.id}').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">${c.label}</span></label>`).join('')}</div>`;
+
+    let rowsHTML = allItems.map(item => {
+      const order = orderMap[item._order?.id] || {};
+      const sku = allSkus.find(s => s.id === item.skuId) || allSkus.find(s => s.kod === item.kod);
+      const grp = sku ? allGroups.find(g => g.id === sku.groupId) : null;
+      return `<tr>
+        <td class="rc-tarikh" data-label="Tarikh">${escHtml(order.tarikh || '')}</td>
+        <td class="rc-pembuat" data-label="Pembuat">${escHtml(order.namaPembuat || '')}</td>
+        <td class="rc-kod" data-label="Kod"><code>${escHtml(item.kod || '')}</code></td>
+        <td class="rc-nama" data-label="Nama">${sku ? escHtml(sku.nama) : '-'}</td>
+        <td class="rc-kumpulan" data-label="Kumpulan">${grp ? escHtml(grp.name) : '—'}</td>
+        <td class="rc-qty" data-label="Kuantiti">${formatNum(item.qtyOrdered || 0)}</td>
+      </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-body" style="padding:12px 16px">${toggleBar}</div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <div class="table-scroll">
+            <table id="order-report-table">
+              <thead><tr>${cols.map(c => `<th class="${c.id}">${c.label}</th>`).join('')}</tr></thead>
+              <tbody>${rowsHTML}</tbody>
+            </table>
+          </div>
         </div>
-        <div class="table-wrap">
-          <table><thead><tr><th>Kod</th><th>Nama</th><th>Kuantiti Dipesan</th><th>Nota</th></tr></thead><tbody>`;
-      for (const item of items) {
-        const sku = allSkus.find(s => s.id === item.skuId) || allSkus.find(s => s.kod === item.kod);
-        html += `<tr>
-          <td data-label="Kod"><code>${escHtml(item.kod)}</code></td>
-          <td data-label="Nama">${sku ? escHtml(sku.nama) : '-'}</td>
-          <td data-label="Kuantiti" class="text-right">${formatNum(item.qtyOrdered)}</td>
-          <td data-label="Nota">${escHtml(item.notes || '')}</td>
+      </div>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px">Jumlah rekod: ${allItems.length}</p>
+    `;
+  });
+}
+
+// ===== BUILD ORDER PRINT VIEW (popup window) =====
+async function buildPrintView(orderId) {
+  const [orderData, skus, groups] = await Promise.all([
+    apiFetch('/api/orders/' + orderId),
+    apiFetch('/api/skus'),
+    apiFetch('/api/groups')
+  ]);
+  if (!orderData) return;
+  const items = orderData.items || [];
+  const skuMap = {};
+  skus.forEach(s => { skuMap[s.id] = s; skuMap[(s.kod||'').toLowerCase()] = s; });
+  const groupMap = {};
+  groups.forEach(g => { groupMap[g.id] = g.name; });
+  const appTitle = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+
+  // Group items by kumpulan
+  const grouped = {};
+  items.forEach(item => {
+    const sku = skuMap[item.skuId] || skuMap[(item.kod||'').toLowerCase()];
+    const groupName = (sku && groupMap[sku.groupId]) || '(Tiada Kumpulan)';
+    if (!grouped[groupName]) grouped[groupName] = [];
+    const levels = sku ? calculateLevels(sku) : { min: 0, penimbal: 0, maks: 0 };
+    grouped[groupName].push({ ...item, sku, levels });
+  });
+  const groupNames = Object.keys(grouped).sort();
+  const supplierGroup = groupNames.length === 1 ? groupNames[0] : 'Pelbagai';
+
+  let rowsHTML = '';
+  groupNames.forEach(groupName => {
+    rowsHTML += `<tr class="group-header"><td colspan="9"><strong>${escHtml(groupName)}</strong></td></tr>`;
+    grouped[groupName]
+      .sort((a, b) => ((a.sku||{}).nama||'').localeCompare((b.sku||{}).nama||''))
+      .forEach(({ sku, levels, qtyOrdered, notes }) => {
+        rowsHTML += `<tr>
+          <td><code>${escHtml((sku||{}).kod||'')}</code></td>
+          <td>${escHtml((sku||{}).nama||'')}</td>
+          <td>${escHtml(groupMap[(sku||{}).groupId]||'—')}</td>
+          <td>${levels.min}</td><td>${levels.penimbal}</td><td>${levels.maks}</td>
+          <td>${(sku||{}).stokSemasa||0}</td><td>${qtyOrdered||0}</td>
+          <td>${escHtml(notes||'')}</td>
         </tr>`;
-      }
-      html += '</tbody></table></div></div>';
-      $('order-report-content').innerHTML = html;
-    } catch (err) { /* handled */ }
+      });
   });
-  // Print order report
-  $('btn-print-order-report').addEventListener('click', () => {
-    $('page-order-report').classList.add('print-target');
-    setTimeout(() => {
-      window.print();
-      $('page-order-report').classList.remove('print-target');
-    }, 100);
-  });
+
+  const sharedCSS = getReportDocumentCSS();
+  const bodyHTML = `
+    <div style="text-align:center;margin-bottom:12px">
+      <h2 style="font-size:16pt;margin:0">${escHtml(appTitle)}</h2>
+      <h3 style="font-size:13pt;margin:4px 0">Borang Permohonan Stok</h3>
+    </div>
+    <div style="margin-bottom:8px;font-size:10pt;border:1px solid #ccc;padding:6px;border-radius:3px">
+      <strong>ID Pesanan:</strong> ${orderData.id} &nbsp;|&nbsp;
+      <strong>Tarikh:</strong> ${escHtml(orderData.tarikh||'')} &nbsp;|&nbsp;
+      <strong>Pembuat:</strong> ${escHtml(orderData.namaPembuat||'')} &nbsp;|&nbsp;
+      <strong>Kumpulan:</strong> ${escHtml(supplierGroup)}
+      ${orderData.notes ? '<br><strong>Nota:</strong> '+escHtml(orderData.notes) : ''}
+    </div>
+    <table>
+      <thead><tr><th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Min</th><th>Penimbal</th><th>Maks</th><th>Stok</th><th>Kuantiti</th><th>Nota</th></tr></thead>
+      <tbody>${rowsHTML}</tbody>
+    </table>
+    <div style="display:flex;gap:60px;margin-top:30px">
+      <div style="flex:1"><p>Disediakan oleh:</p><p style="margin-top:32px;border-top:1px solid #000;padding-top:4px">${escHtml(orderData.namaPembuat||'…………………………………')}<br><small>(Pembuat Pesanan)</small></p></div>
+      <div style="flex:1"><p>Disahkan oleh:</p><p style="margin-top:32px;border-top:1px solid #000;padding-top:4px">……………………………………<br><small>(Tandatangan &amp; Cop)</small></p></div>
+    </div>
+    <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
+  `;
+  const printHTML = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8"><title>${escHtml(appTitle)} — Pesanan #${orderId}</title><style>${sharedCSS}</style></head><body>${bodyHTML}</body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { showCustomAlert('Amaran', 'Sila benarkan pop-up untuk mencetak laporan.'); return; }
+  w.document.write(printHTML);
+  w.document.close();
 }
 
 // ===== SKU REPORT =====
 function initSKUReport() {
-  loadSKUReport();
-  $('sku-report-group-filter').addEventListener('change', loadSKUReport);
-  $('sku-report-status-filter').addEventListener('change', loadSKUReport);
-  $('sku-report-enabled-filter').addEventListener('change', loadSKUReport);
-  $('btn-print-sku-report').addEventListener('click', () => {
-    $('page-sku-report').classList.add('print-target');
-    setTimeout(() => {
-      window.print();
-      $('page-sku-report').classList.remove('print-target');
-    }, 100);
+  $('btn-generate-sku-report').addEventListener('click', async () => {
+    const statusFilter = $('sku-status-filter')?.value;
+    const skus = allSkus.filter(s => s.enabled !== false);
+    const filtered = skus.map(sku => {
+      const levels = calculateLevels(sku);
+      const status = determineStockStatus(sku);
+      return { ...sku, levels, status };
+    }).filter(s => !statusFilter || s.status === statusFilter);
+
+    const container = $('sku-report-container');
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="card"><div class="card-body"><div class="empty-state"><p>Tiada rekod dijumpai.</p></div></div></div>';
+      return;
+    }
+
+    const cols = [
+      { id: 'sr-kod', label: 'Kod' },
+      { id: 'sr-nama', label: 'Nama' },
+      { id: 'sr-kumpulan', label: 'Kumpulan', hidden: true },
+      { id: 'sr-stok', label: 'Stok Semasa' },
+      { id: 'sr-awu', label: 'AWU' },
+      { id: 'sr-min', label: 'Min', hidden: true },
+      { id: 'sr-penimbal', label: 'Penimbal', hidden: true },
+      { id: 'sr-maks', label: 'Maks', hidden: true },
+      { id: 'sr-minggu', label: 'Minggu Stok' },
+      { id: 'sr-status', label: 'Status' }
+    ];
+
+    const toggleBar = `<div class="col-toggle-bar" style="margin-bottom:8px">${cols.map(c => `<label class="toggle-switch"><input type="checkbox" ${c.hidden?'':'checked'} onchange="document.querySelectorAll('.${c.id}').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">${c.label}</span></label>`).join('')}</div>`;
+
+    // Group by kumpulan
+    const grouped = {};
+    filtered.forEach(sku => {
+      const groupName = allGroups.find(g => g.id === sku.groupId)?.name || '(Tiada Kumpulan)';
+      if (!grouped[groupName]) grouped[groupName] = [];
+      grouped[groupName].push(sku);
+    });
+
+    let rowsHTML = '';
+    Object.keys(grouped).sort().forEach(groupName => {
+      rowsHTML += `<tr class="group-header"><td colspan="${cols.length}"><strong>${escHtml(groupName)}</strong></td></tr>`;
+      grouped[groupName].sort((a, b) => (a.nama||'').localeCompare(b.nama||'')).forEach(sku => {
+        const grp = allGroups.find(g => g.id === sku.groupId);
+        const awu = sku.levels.awu;
+        const weeksStock = awu > 0 ? ((sku.stokSemasa||0) / awu).toFixed(1) : '-';
+        rowsHTML += `<tr>
+          <td class="sr-kod" data-label="Kod"><code>${escHtml(sku.kod)}</code></td>
+          <td class="sr-nama" data-label="Nama">${escHtml(sku.nama)}</td>
+          <td class="sr-kumpulan" data-label="Kumpulan">${grp ? escHtml(grp.name) : '—'}</td>
+          <td class="sr-stok" data-label="Stok">${formatNum(sku.stokSemasa)}</td>
+          <td class="sr-awu" data-label="AWU">${formatNum(awu)}</td>
+          <td class="sr-min" data-label="Min">${formatNum(sku.levels.min)}</td>
+          <td class="sr-penimbal" data-label="Penimbal">${formatNum(sku.levels.penimbal)}</td>
+          <td class="sr-maks" data-label="Maks">${formatNum(sku.levels.maks)}</td>
+          <td class="sr-minggu" data-label="Minggu">${weeksStock}</td>
+          <td class="sr-status" data-label="Status">${statusBadge(sku.status)}</td>
+        </tr>`;
+      });
+    });
+
+    container.innerHTML = `
+      <div class="card"><div class="card-body" style="padding:12px 16px">${toggleBar}</div></div>
+      <div class="card"><div class="card-body" style="padding:0"><div class="table-scroll">
+        <table id="sku-report-table">
+          <thead><tr>${cols.map(c => `<th class="${c.id}">${c.label}</th>`).join('')}</tr></thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+      </div></div></div>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:4px">Jumlah rekod: ${filtered.length}</p>
+    `;
   });
-}
-function loadSKUReport() {
-  const groupId = $('sku-report-group-filter')?.value;
-  const statusFilter = $('sku-report-status-filter')?.value;
-  const enabledOnly = $('sku-report-enabled-filter')?.checked;
-  const filtered = allSkus.filter(s => {
-    if (enabledOnly && !s.enabled) return false;
-    if (groupId && s.groupId !== parseInt(groupId)) return false;
-    const st = determineStockStatus(s);
-    if (statusFilter && st !== statusFilter) return false;
-    return true;
+
+  // Print SKU report via popup
+  $('sku-report-print-btn').addEventListener('click', () => {
+    const container = $('sku-report-container');
+    if (!container.innerHTML.trim()) {
+      showCustomAlert('Amaran', 'Sila jana laporan dahulu sebelum mencetak.');
+      return;
+    }
+    const title = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+    const printCSS = getReportDocumentCSS(`
+      .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9pt;font-weight:700}
+      .badge-success{background:#D1FAE5;color:#065F46}.badge-warning{background:#FEF3C7;color:#92400E}
+      .badge-danger{background:#FEE2E2;color:#991B1B}.badge-info{background:#DBEAFE;color:#1E40AF}
+      .badge-gray{background:#F1F5F9;color:#374151}
+    `);
+    const printHTML = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8"><title>${escHtml(title)} — Laporan SKU</title><style>${printCSS}</style></head><body>
+      <div style="text-align:center;margin-bottom:12px"><h2 style="font-size:16pt;margin:0">${escHtml(title)}</h2><h3 style="font-size:13pt;margin:4px 0">Laporan SKU</h3></div>
+      ${container.innerHTML}
+      <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
+    </body></html>`;
+    const w = window.open('', '_blank');
+    if (!w) { showCustomAlert('Amaran', 'Sila benarkan pop-up untuk mencetak laporan.'); return; }
+    w.document.write(printHTML);
+    w.document.close();
   });
-  const tbody = $('sku-report-table').querySelector('tbody');
-  tbody.innerHTML = filtered.map(sku => {
-    const grp = allGroups.find(g => g.id === sku.groupId);
-    const levels = calculateLevels(sku);
-    const status = determineStockStatus(sku);
-    const awu = levels.awu;
-    const weeksStock = awu > 0 ? ((sku.stokSemasa || 0) / awu).toFixed(1) : '-';
-    return `<tr>
-      <td data-label="Kod"><code>${escHtml(sku.kod)}</code></td>
-      <td data-label="Nama">${escHtml(sku.nama)}</td>
-      <td data-label="Kumpulan">${grp ? escHtml(grp.name) : '-'}</td>
-      <td data-label="Stok" class="text-right">${formatNum(sku.stokSemasa)}</td>
-      <td data-label="AWU" class="text-right">${formatNum(levels.awu)}</td>
-      <td data-label="Min" class="text-right">${formatNum(levels.min)}</td>
-      <td data-label="Penimbal" class="text-right">${formatNum(levels.penimbal)}</td>
-      <td data-label="Maks" class="text-right">${formatNum(levels.maks)}</td>
-      <td data-label="Minggu" class="text-right">${weeksStock}</td>
-      <td data-label="Status">${statusBadge(status)}</td>
-    </tr>`;
-  }).join('');
 }
 
 // ===== SETTINGS =====
