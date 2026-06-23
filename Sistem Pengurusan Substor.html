@@ -132,14 +132,6 @@ tr:hover td{background:var(--gray-50)}
 .toast-info{background:var(--info)}
 @keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 .footer-bar{height:32px;background:#fff;border-top:1px solid var(--gray-200);display:flex;align-items:center;padding:0 24px;font-size:12px;color:var(--gray-500);flex-shrink:0;gap:16px}
-.card-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.sku-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray-200);padding:16px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .15s}
-.sku-card:hover{box-shadow:var(--shadow-md)}
-.sku-card .sku-header{display:flex;justify-content:space-between;align-items:flex-start}
-.sku-card .sku-kod{font-size:12px;color:var(--gray-500);font-family:monospace}
-.sku-card .sku-nama{font-weight:600;font-size:14px}
-.sku-card .sku-meta{display:flex;gap:12px;font-size:12px;color:var(--gray-500)}
-.sku-card .sku-actions{display:flex;gap:8px;margin-top:auto;padding-top:8px;border-top:1px solid var(--gray-100)}
 .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--gray-200);padding-bottom:0}
 .tab{padding:8px 16px;cursor:pointer;font-size:14px;font-weight:500;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none}
 .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
@@ -167,7 +159,6 @@ tr:hover td{background:var(--gray-50)}
   .main-area{margin-left:0}
   .summary-cards{grid-template-columns:1fr}
   .form-row{grid-template-columns:1fr}
-  .card-view{grid-template-columns:1fr}
 }
 select[multiple]{min-height:80px}
 .table-scroll{overflow-x:auto;max-height:500px;overflow-y:auto}
@@ -221,7 +212,6 @@ select[multiple]{min-height:80px}
   .main-area{margin-left:0}
   .summary-cards{grid-template-columns:1fr 1fr}
   .form-row{grid-template-columns:1fr}
-  .card-view{grid-template-columns:1fr}
   .header{padding:0 12px}
   .header h1{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .content{padding:12px}
@@ -244,7 +234,6 @@ select[multiple]{min-height:80px}
   .order-item-row select,.order-item-row input{width:100%}
   .btn{padding:10px 14px;min-height:44px}
   .footer-bar{font-size:11px;padding:0 12px}
-  .sku-card .sku-actions{flex-wrap:wrap}
   .summary-card{padding:14px;gap:12px}
   .summary-card .icon-wrap{width:40px;height:40px}
   .summary-card .info h3{font-size:20px}
@@ -353,10 +342,6 @@ select[multiple]{min-height:80px}
   <div class="page-header">
     <h2>Pengurusan SKU</h2>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-outline btn-sm" id="toggle-view-mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-        Paparan Kad
-      </button>
       <button class="btn btn-primary" id="btn-add-sku">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14m-7-7h14"/></svg>
         Tambah SKU
@@ -391,7 +376,6 @@ select[multiple]{min-height:80px}
       </table>
     </div>
   </div>
-  <div id="sku-card-view" style="display:none"></div>
 </div>
 
 <!-- ========== GROUPS ========== -->
@@ -643,7 +627,6 @@ select[multiple]{min-height:80px}
         <li><strong>Padam</strong> — Klik ikon tong sampah untuk memadam item (tidak boleh jika masih ada dalam pesanan).</li>
         <li><strong>Cari</strong> — Gunakan medan carian untuk mencari mengikut kod atau nama.</li>
         <li><strong>Tapis Kumpulan</strong> — Pilih kumpulan untuk menapis senarai.</li>
-        <li><strong>Paparan Kad</strong> — Tukar antara paparan jadual dan kad.</li>
         <li><strong>Tukar Stok</strong> — Klik pada nilai stok semasa untuk mengedit secara langsung.</li>
         <li><strong>Pilihan Kolom</strong> — Gunakan suis togol untuk menunjuk/menyembunyikan lajur.</li>
       </ul>
@@ -1197,7 +1180,7 @@ async function loadDashboard() {
 }
 
 // ===== SKU MANAGEMENT =====
-let skuViewMode = 'table';
+let allOrders = [];
 async function loadSkus() {
   try {
     allSkus = await apiFetch('/api/skus');
@@ -1220,9 +1203,8 @@ function getFilteredSkus() {
 }
 function renderSkus() {
   const filtered = getFilteredSkus();
-  if (skuViewMode === 'table') {
-    const tbody = $('sku-table').querySelector('tbody');
-    tbody.innerHTML = filtered.map(sku => {
+  const tbody = $('sku-table').querySelector('tbody');
+  tbody.innerHTML = filtered.map(sku => {
       const grp = allGroups.find(g => g.id === sku.groupId);
       const levels = calculateLevels(sku);
       const status = determineStockStatus(sku);
@@ -1242,29 +1224,6 @@ function renderSkus() {
         </td>
       </tr>`;
     }).join('');
-  } else {
-    $('sku-card-view').innerHTML = filtered.length ? '<div class="card-view">' + filtered.map(sku => {
-      const grp = allGroups.find(g => g.id === sku.groupId);
-      const levels = calculateLevels(sku);
-      const status = determineStockStatus(sku);
-      return `<div class="sku-card">
-        <div class="sku-header"><span class="sku-kod">${escHtml(sku.kod)}</span>${statusBadge(status)}</div>
-        <div class="sku-nama">${escHtml(sku.nama)}</div>
-        <div class="sku-meta">
-          <span>${grp ? escHtml(grp.name) : '-'}</span>
-          <span>Stok: ${formatNum(sku.stokSemasa)}</span>
-        </div>
-        <div class="sku-meta">
-          <span>Min: ${formatNum(levels.min)}</span>
-          <span>Maks: ${formatNum(levels.maks)}</span>
-        </div>
-        <div class="sku-actions">
-          <button class="btn btn-outline btn-sm" onclick="window._editSku(${sku.id})">Edit</button>
-          <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="window._deleteSku(${sku.id})">Padam</button>
-        </div>
-      </div>`;
-    }).join('') + '</div>' : '<div class="empty-state"><p>Tiada SKU</p></div>';
-  }
 }
 window._editSku = function(id) {
   const sku = allSkus.find(s => s.id === id);
@@ -1357,15 +1316,6 @@ function initSKUEvents() {
       $('sku-modal').classList.remove('show');
       loadSkus();
     } catch (err) { /* handled */ }
-  });
-  $('toggle-view-mode').addEventListener('click', () => {
-    skuViewMode = skuViewMode === 'table' ? 'card' : 'table';
-    $('toggle-view-mode').innerHTML = skuViewMode === 'table'
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg> Paparan Kad'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 10h18M3 14h18M3 6h18M3 18h18"/></svg> Paparan Jadual';
-    $('sku-table-view').style.display = skuViewMode === 'table' ? 'block' : 'none';
-    $('sku-card-view').style.display = skuViewMode === 'card' ? 'block' : 'none';
-    renderSkus();
   });
   $('sku-search').addEventListener('input', renderSkus);
   $('sku-group-filter').addEventListener('change', renderSkus);
@@ -2133,15 +2083,36 @@ function initSyncPage() {
         method: 'POST',
         body: JSON.stringify({ filename: file.name, rows })
       });
-      let html = `<p><strong>Import Excel Berjaya</strong></p>
-        <p>Dikemaskini: ${result.updated} item</p>
-        <p>Tidak dijumpai: ${result.notFound} item</p>`;
-      if (result.unmatched && result.unmatched.length > 0) {
-        html += '<p style="margin-top:8px"><strong>Tidak dijumpai:</strong></p><ul style="font-size:13px;margin-left:16px">';
-        result.unmatched.forEach(u => { html += '<li>' + escHtml(u.kod) + ' - ' + escHtml(u.nama) + '</li>'; });
-        html += '</ul>';
+
+      let html = '<div style="font-size:13px">';
+
+      // Updated items
+      html += '<h4 style="margin:0 0 8px;color:var(--primary)">Item Yang Dikemaskini (' + result.updatedCount + ')</h4>';
+      if (result.updated.length > 0) {
+        html += '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px"><thead><tr style="background:var(--gray-50)"><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:left">Kod</th><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:left">Nama</th><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:right">Stok Lama</th><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:right">Stok Baru</th></tr></thead><tbody>';
+        result.updated.forEach(u => {
+          html += '<tr><td style="padding:4px 8px;border:1px solid var(--gray-200)"><code>' + escHtml(u.kod) + '</code></td><td style="padding:4px 8px;border:1px solid var(--gray-200)">' + escHtml(u.nama) + '</td><td style="padding:4px 8px;border:1px solid var(--gray-200);text-align:right;color:var(--danger)">' + formatNum(u.oldQty) + '</td><td style="padding:4px 8px;border:1px solid var(--gray-200);text-align:right;color:var(--success);font-weight:600">' + formatNum(u.newQty) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+      } else {
+        html += '<p style="color:var(--gray-500);margin-bottom:16px">Tiada item dikemaskini (semua stok sama).</p>';
       }
-      showCustomAlertHTML('Keputusan Import Excel', html);
+
+      // Missing from Excel
+      html += '<h4 style="margin:0 0 8px;color:var(--warning)">Item Yang Tidak Ada Dalam Excel (' + result.missingFromExcelCount + ')</h4>';
+      if (result.missingFromExcel.length > 0) {
+        html += '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:12px"><thead><tr style="background:var(--gray-50)"><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:left">Kod</th><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:left">Nama</th><th style="padding:6px 8px;border:1px solid var(--gray-200);text-align:right">Stok Semasa</th></tr></thead><tbody>';
+        result.missingFromExcel.forEach(s => {
+          html += '<tr><td style="padding:4px 8px;border:1px solid var(--gray-200)"><code>' + escHtml(s.kod) + '</code></td><td style="padding:4px 8px;border:1px solid var(--gray-200)">' + escHtml(s.nama) + '</td><td style="padding:4px 8px;border:1px solid var(--gray-200);text-align:right">' + formatNum(s.stokSemasa) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+      } else {
+        html += '<p style="color:var(--gray-500);margin-bottom:16px">Semua item dalam pangkalan data ada dalam fail Excel.</p>';
+      }
+
+      html += '</div>';
+
+      showCustomAlertHTML('Keputusan Import Excel — ' + file.name, html);
       loadSkus();
       loadDashboard();
     } catch (err) {

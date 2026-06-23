@@ -12,9 +12,11 @@ export default async function handler(req, res) {
     }
 
     const allSkus = await SKU.find().lean();
-    const results = { matched: [], notFound: [], updated: 0, errors: 0 };
-
     const normalizeStr = (s) => (s || '').toString().trim().toUpperCase();
+
+    const updated = [];
+    const missingFromExcel = [...allSkus];
+    const notFoundInApp = [];
 
     for (const row of rows) {
       const codeCol = row['Drug / Non Drug Code'] || row['code'] || '';
@@ -22,6 +24,7 @@ export default async function handler(req, res) {
       const qtyCol = row['Quantity Available'] || row['quantity'] || 0;
       const normCode = normalizeStr(codeCol);
       const normDesc = normalizeStr(descCol);
+      const qty = parseInt(qtyCol) || 0;
 
       let sku = allSkus.find(s => normalizeStr(s.kod) === normCode);
       if (!sku) {
@@ -29,23 +32,35 @@ export default async function handler(req, res) {
       }
 
       if (sku) {
-        const qty = parseInt(qtyCol) || 0;
-        await SKU.findByIdAndUpdate(sku._id, { stokSemasa: qty });
-        results.matched.push({ kod: sku.kod, nama: sku.nama, qty });
-        results.updated++;
+        const oldQty = sku.stokSemasa || 0;
+        if (oldQty !== qty) {
+          await SKU.findByIdAndUpdate(sku._id, { stokSemasa: qty });
+          updated.push({
+            kod: sku.kod,
+            nama: sku.nama,
+            oldQty,
+            newQty: qty
+          });
+        }
+        const idx = missingFromExcel.findIndex(s => String(s._id) === String(sku._id));
+        if (idx !== -1) missingFromExcel.splice(idx, 1);
       } else {
-        results.notFound.push({ kod: codeCol, nama: descCol });
-        results.errors++;
+        notFoundInApp.push({ kod: codeCol, nama: descCol, qty });
       }
     }
 
     return res.status(200).json({
       success: true,
       filename: filename || 'unknown',
-      updated: results.updated,
-      notFound: results.errors,
-      matched: results.matched,
-      unmatched: results.notFound
+      updated,
+      updatedCount: updated.length,
+      missingFromExcel: missingFromExcel.map(s => ({
+        kod: s.kod,
+        nama: s.nama,
+        stokSemasa: s.stokSemasa || 0
+      })),
+      missingFromExcelCount: missingFromExcel.length,
+      notFoundInAppCount: notFoundInApp.length
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
