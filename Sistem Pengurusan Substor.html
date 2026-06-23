@@ -86,6 +86,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 .icon-cyan{background:var(--info-light);color:var(--info)}
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--gray-200)}
 table{width:100%;border-collapse:collapse;font-size:13px}
+.card-body>.table-wrap,.card-body>.table-scroll{margin:4px}
 thead{background:var(--gray-50)}
 th{padding:10px 12px;text-align:left;font-weight:600;color:var(--gray-600);border-bottom:2px solid var(--gray-200);white-space:nowrap;position:relative;user-select:none}
 th.sortable{cursor:pointer}
@@ -217,7 +218,7 @@ select[multiple]{min-height:80px}
   .summary-card .icon-wrap{width:40px;height:40px}
   .summary-card .info h3{font-size:20px}
   .table-scroll{max-height:400px}
-  .table-scroll table{font-size:12px}
+  .table-wrap table,.table-scroll table{font-size:12px;width:auto;min-width:max-content}
   th{font-size:12px;white-space:normal}
   td{font-size:12px}
   .btn-sm{padding:6px 8px;font-size:11px;min-height:36px;min-width:36px}
