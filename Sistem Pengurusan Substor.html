@@ -189,16 +189,18 @@ select[multiple]{min-height:80px}
 .col-toggle-bar .toggle-label{font-size:11px}
 .col-hidden,.col-hidden *{display:none!important}
 
-/* Mobile card layout for tables */
+/* Card layout for all app tables (mobile + optional) */
 @media(max-width:768px){
-  .table-wrap table thead{display:none}
-  .table-wrap table tbody tr{display:block;padding:12px;margin-bottom:10px;border:1px solid var(--gray-200);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
-  .table-wrap table tbody td{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
-  .table-wrap table tbody td:last-child{border-bottom:none}
-  .table-wrap table tbody td::before{content:attr(data-label);font-weight:600;color:var(--gray-500);font-size:12px;min-width:120px;flex-shrink:0}
-  .table-wrap table tbody td.text-right{text-align:right}
-  #low-stock-table,#sku-report-table,#sku-table,#group-table,#order-list-table,#sku-table,#order-report-content table{font-size:13px}
-  .order-report-content table{display:block}
+  .table-scroll table thead,.table-wrap table thead{display:none}
+  .table-scroll table tbody tr,.table-wrap table tbody tr{display:block;padding:12px;margin-bottom:10px;border:1px solid var(--gray-200);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+  .table-scroll table tbody td,.table-wrap table tbody td{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
+  .table-scroll table tbody td:last-child,.table-wrap table tbody td:last-child{border-bottom:none}
+  .table-scroll table tbody td::before,.table-wrap table tbody td::before{content:attr(data-label);font-weight:600;color:var(--gray-500);font-size:12px;min-width:100px;flex-shrink:0}
+  .table-scroll table tbody td.text-right,.table-wrap table tbody td.text-right{text-align:right}
+  #low-stock-table,#sku-report-table,#sku-table,#group-table,#order-list-table,#order-report-content table,#sku-report-container table{font-size:13px}
+  .table-scroll table tbody tr.group-header,.table-wrap table tbody tr.group-header{background:var(--primary);color:#fff;padding:8px 12px}
+  .table-scroll table tbody tr.group-header td,.table-wrap table tbody tr.group-header td{display:block;border:none;padding:0}
+  .table-scroll table tbody td .btn,.table-wrap table tbody td .btn{width:100%;justify-content:center;margin-top:4px}
 }
 
 /* Loading overlay */
@@ -1464,7 +1466,7 @@ function renderCreateOrderItems() {
   });
   container.innerHTML = createOrderItems.length === 0
     ? '<p style="color:#6b7280">Tiada SKU aktif.</p>'
-    : '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    : '<div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
       '<thead><tr>' +
       '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid #e5e7eb;width:40%">Kod & Nama</th>' +
       '<th style="text-align:center;padding:6px 8px;border-bottom:2px solid #e5e7eb">AWU</th>' +
@@ -1476,14 +1478,14 @@ function renderCreateOrderItems() {
         const sku = allSkus.find(s => s.kod === item.kod);
         const awu = sku ? Math.round(calculateAWU(sku)) : 0;
         return '<tr>' +
-          '<td style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><code>' + escHtml(item.kod) + '</code> ' + escHtml(item.nama) + '</td>' +
-          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + awu + '</td>' +
-          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + (sku ? (sku.stokSemasa || 0) : 0) + '</td>' +
-          '<td style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="number" value="' + item.qtyOrdered + '" min="0" style="width:80px;padding:4px;text-align:center;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'qtyOrdered\',parseInt(this.value)||0)"></td>' +
-          '<td style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="text" value="' + escHtml(item.notes) + '" style="width:100%;padding:4px;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'notes\',this.value)" placeholder="Nota"></td>' +
+          '<td data-label="Item" style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><code>' + escHtml(item.kod) + '</code> ' + escHtml(item.nama) + '</td>' +
+          '<td data-label="AWU" style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + awu + '</td>' +
+          '<td data-label="Stok" style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb">' + (sku ? (sku.stokSemasa || 0) : 0) + '</td>' +
+          '<td data-label="Kuantiti" style="text-align:center;padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="number" value="' + item.qtyOrdered + '" min="0" style="width:80px;padding:4px;text-align:center;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'qtyOrdered\',parseInt(this.value)||0)"></td>' +
+          '<td data-label="Nota" style="padding:6px 8px;border-bottom:1px solid #e5e7eb"><input type="text" value="' + escHtml(item.notes) + '" style="width:100%;padding:4px;border:1px solid #d1d5db;border-radius:4px" onchange="window._updateCreateItem(' + i + ',\'notes\',this.value)" placeholder="Nota"></td>' +
           '</tr>';
       }).join('') +
-      '</tbody></table>';
+      '</tbody></table></div>';
 }
 window._updateCreateItem = function(idx, field, val) {
   createOrderItems[idx][field] = val;
