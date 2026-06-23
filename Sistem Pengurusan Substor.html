@@ -886,8 +886,9 @@ function addColumnToggles(tableId, targetId) {
   target.innerHTML = '';
   headers.forEach((th, idx) => {
     const label = th.textContent.trim();
-    const cb = document.createElement('label');
-    cb.style.cssText = 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;white-space:nowrap';
+    const id = tableId + '-col-' + idx;
+    const toggle = document.createElement('label');
+    toggle.className = 'toggle-switch';
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = true;
@@ -904,11 +905,16 @@ function addColumnToggles(tableId, targetId) {
         if (cells[col]) cells[col].style.display = show ? '' : 'none';
       });
     });
-    const span = document.createElement('span');
-    span.textContent = label;
-    cb.appendChild(input);
-    cb.appendChild(span);
-    target.appendChild(cb);
+    const slider = document.createElement('span');
+    slider.className = 'toggle-slider';
+    const lbl = document.createElement('span');
+    lbl.className = 'toggle-label';
+    lbl.style.fontSize = '12px';
+    lbl.textContent = label;
+    toggle.appendChild(input);
+    toggle.appendChild(slider);
+    toggle.appendChild(lbl);
+    target.appendChild(toggle);
   });
 }
 
@@ -1545,7 +1551,32 @@ window._deleteOrder = function(id) {
 
 // ===== ORDER REPORT =====
 function getReportDocumentCSS(extraCSS) {
-  return `*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Segoe UI",Arial,sans-serif;font-size:11pt;color:#1E293B;padding:16px;background:#fff}table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10pt}th,td{border:1px solid #C0D4E8;padding:4px 6px;text-align:left;vertical-align:top}thead tr{background:#E6EFF8}tbody tr:nth-child(even):not(.group-header){background:#F8FAFF}tr.group-header td{background:#1E3A8A;color:#fff;padding:4px 6px;font-weight:700}code{font-family:"Cascadia Code",Consolas,monospace;font-size:9pt}.col-hidden{display:none!important}.label-with-icon{display:inline-flex;align-items:center;gap:6px}.toggle-switch{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border:1px solid #C0D4E8;border-radius:6px;background:#F8FAFF;font-size:10pt;user-select:none}.toggle-switch input{display:none}.toggle-slider{width:36px;height:20px;background:#CBD5E1;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.toggle-switch input:checked+.toggle-slider{background:#1E3A8A}.toggle-switch input:checked+.toggle-slider::after{transform:translateX(16px)}.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.print-actions{text-align:center;margin:16px 0}.print-actions button{padding:8px 20px;margin:0 6px;font-size:11pt;cursor:pointer;border:none;border-radius:4px;display:inline-flex;align-items:center;justify-content:center}.btn-print{background:#1E3A8A;color:#fff}.btn-close{background:#6B7280;color:#fff}${extraCSS||''}@media print{.col-toggle-bar,.print-actions,.no-print{display:none!important}.col-hidden{display:none!important}}`;
+  return `*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:11pt;color:#1f2937;padding:16px;background:#fff;line-height:1.5}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:10pt}
+th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:left;vertical-align:top}
+thead tr{background:#dbeafe}
+th{font-weight:600;color:#1e40af;font-size:10pt}
+tbody tr:nth-child(even):not(.group-header){background:#f0f4ff}
+tr.group-header td{background:#1e3a8a;color:#fff;padding:6px 8px;font-weight:700}
+code{font-family:"Cascadia Code","Fira Code",Consolas,monospace;font-size:9pt}
+.col-hidden{display:none!important}
+.label-with-icon,.inline-icon-text,.toggle-label{display:inline-flex;align-items:center;gap:6px}
+.toggle-switch{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border:1px solid #c0d4e8;border-radius:6px;background:#f0f4ff;font-size:10pt;user-select:none}
+.toggle-switch input{display:none}
+.toggle-slider{width:36px;height:20px;background:#cbd5e1;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}
+.toggle-slider::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle-switch input:checked+.toggle-slider{background:#2563eb}
+.toggle-switch input:checked+.toggle-slider::after{transform:translateX(16px)}
+.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.print-actions{text-align:center;margin:16px 0}
+.print-actions button{padding:8px 20px;margin:0 6px;font-size:11pt;cursor:pointer;border:none;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-print{background:#2563eb;color:#fff}
+.btn-print:hover{background:#1d4ed8}
+.btn-close{background:#6b7280;color:#fff}
+.btn-close:hover{background:#4b5563}
+${extraCSS||''}
+@media print{.col-toggle-bar,.print-actions,.no-print{display:none!important}.col-hidden{display:none!important}}`;
 }
 function initOrderReport() {
   // Populate SKU dropdown for filter
@@ -1684,11 +1715,11 @@ async function buildPrintView(orderId) {
 
   const sharedCSS = getReportDocumentCSS();
   const bodyHTML = `
-    <div style="text-align:center;margin-bottom:12px">
-      <h2 style="font-size:16pt;margin:0">${escHtml(appTitle)}</h2>
-      <h3 style="font-size:13pt;margin:4px 0">Borang Permohonan Stok</h3>
+    <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e3a8a">
+      <h2 style="font-size:16pt;margin:0;color:#1e3a8a">${escHtml(appTitle)}</h2>
+      <h3 style="font-size:13pt;margin:4px 0;color:#2563eb">Borang Permohonan Stok</h3>
     </div>
-    <div style="margin-bottom:8px;font-size:10pt;border:1px solid #ccc;padding:6px;border-radius:3px">
+    <div style="margin-bottom:8px;font-size:10pt;border:1px solid #c0d4e8;padding:8px;border-radius:4px;background:#f0f4ff">
       <strong>ID Pesanan:</strong> ${orderData.id} &nbsp;|&nbsp;
       <strong>Tarikh:</strong> ${escHtml(orderData.tarikh||'')} &nbsp;|&nbsp;
       <strong>Pembuat:</strong> ${escHtml(orderData.namaPembuat||'')} &nbsp;|&nbsp;
@@ -1700,8 +1731,8 @@ async function buildPrintView(orderId) {
       <tbody>${rowsHTML}</tbody>
     </table>
     <div style="display:flex;gap:60px;margin-top:30px">
-      <div style="flex:1"><p>Disediakan oleh:</p><p style="margin-top:32px;border-top:1px solid #000;padding-top:4px">${escHtml(orderData.namaPembuat||'…………………………………')}<br><small>(Pembuat Pesanan)</small></p></div>
-      <div style="flex:1"><p>Disahkan oleh:</p><p style="margin-top:32px;border-top:1px solid #000;padding-top:4px">……………………………………<br><small>(Tandatangan &amp; Cop)</small></p></div>
+      <div style="flex:1"><p style="margin-bottom:60px"><strong>Disediakan oleh:</strong><br><small>(Pembuat Pesanan)</small></p></div>
+      <div style="flex:1"><p style="margin-bottom:60px"><strong>Disahkan oleh:</strong><br><small>(Tandatangan &amp; Cop)</small></p></div>
     </div>
     <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
   `;
@@ -1794,13 +1825,15 @@ function initSKUReport() {
     }
     const title = appSettings.appTitle || 'Sistem Inventori Prabungkus';
     const printCSS = getReportDocumentCSS(`
-      .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9pt;font-weight:700}
-      .badge-success{background:#D1FAE5;color:#065F46}.badge-warning{background:#FEF3C7;color:#92400E}
-      .badge-danger{background:#FEE2E2;color:#991B1B}.badge-info{background:#DBEAFE;color:#1E40AF}
-      .badge-gray{background:#F1F5F9;color:#374151}
+      .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9pt;font-weight:600;white-space:nowrap}
+      .badge-success{background:#dcfce7;color:#166534}
+      .badge-warning{background:#fef3c7;color:#92400e}
+      .badge-danger{background:#fee2e2;color:#991b1b}
+      .badge-info{background:#dbeafe;color:#1e40af}
+      .badge-gray{background:#f1f5f9;color:#374151}
     `);
     const printHTML = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8"><title>${escHtml(title)} — Laporan SKU</title><style>${printCSS}</style></head><body>
-      <div style="text-align:center;margin-bottom:12px"><h2 style="font-size:16pt;margin:0">${escHtml(title)}</h2><h3 style="font-size:13pt;margin:4px 0">Laporan SKU</h3></div>
+      <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1e3a8a"><h2 style="font-size:16pt;margin:0;color:#1e3a8a">${escHtml(title)}</h2><h3 style="font-size:13pt;margin:4px 0;color:#2563eb">Laporan SKU</h3></div>
       ${container.innerHTML}
       <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
     </body></html>`;
