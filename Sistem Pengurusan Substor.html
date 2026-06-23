@@ -207,8 +207,8 @@ select[multiple]{min-height:80px}
   .modal-header{padding:12px 16px}
   .modal-body{padding:16px}
   .modal-footer{padding:12px 16px}
-  .card-header{padding:12px 16px}
-  .card-body{padding:16px}
+  .card-header{padding:12px 16px;flex-wrap:wrap}
+  .card-body{padding:12px}
   .order-item-row{flex-direction:column;align-items:stretch}
   .order-item-row select,.order-item-row input{width:100%}
   .btn{padding:10px 14px;min-height:44px}
@@ -216,6 +216,13 @@ select[multiple]{min-height:80px}
   .summary-card{padding:14px;gap:12px}
   .summary-card .icon-wrap{width:40px;height:40px}
   .summary-card .info h3{font-size:20px}
+  .table-scroll{max-height:400px}
+  .table-scroll table{font-size:12px}
+  th{font-size:12px;white-space:normal}
+  td{font-size:12px}
+  .btn-sm{padding:6px 8px;font-size:11px;min-height:36px;min-width:36px}
+  .col-toggle-bar{gap:4px;padding:6px 8px}
+  .col-toggle-bar .toggle-label{font-size:10px}
 }
 @media(max-width:480px){
   .summary-cards{grid-template-columns:1fr}
@@ -831,10 +838,10 @@ select[multiple]{min-height:80px}
       </button>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" id="btn-delete-order">Padam</button>
+      <button class="btn btn-danger" id="btn-delete-order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Padam</button>
       <div style="flex:1"></div>
-      <button class="btn btn-outline modal-close" data-modal="edit-order-modal">Batal</button>
-      <button class="btn btn-primary" id="btn-update-order">Simpan</button>
+      <button class="btn btn-outline modal-close" data-modal="edit-order-modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M6 18L18 6M6 6l12 12"/></svg> Batal</button>
+      <button class="btn btn-primary" id="btn-update-order"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 13l4 4L19 7"/></svg> Simpan</button>
     </div>
   </div>
 </div>
@@ -1460,10 +1467,10 @@ async function loadOrders() {
         <td data-label="Pembuat">${escHtml(o.namaPembuat)}</td>
         <td data-label="Tempoh">${o.tempohMinggu || 0} minggu</td>
         <td data-label="Item">${itemCount} item</td>
-        <td data-label="Aksi">
-          <button class="btn btn-outline btn-sm" onclick="buildPrintView(${o.id})">Cetak</button>
-          <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button>
-          <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button>
+        <td data-label="Aksi" style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="buildPrintView(${o.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Cetak</button>
+          <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="window._deleteOrder(${o.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> Padam</button>
         </td>
       </tr>`;
     }).join('');
