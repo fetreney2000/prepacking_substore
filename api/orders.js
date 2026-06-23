@@ -24,7 +24,13 @@ export default async function handler(req, res) {
     switch (req.method) {
       case 'GET': {
         const orders = await Order.find().sort({ tarikh: -1 }).lean();
-        return res.status(200).json(orders.map(formatDoc));
+        const formatted = orders.map(formatDoc);
+        // Add item count for each order
+        for (const o of formatted) {
+          const count = await OrderItem.countDocuments({ orderId: o.id });
+          o.itemCount = count;
+        }
+        return res.status(200).json(formatted);
       }
       case 'POST': {
         const { tarikh, namaPembuat, tempohMinggu, notes, items } = req.body;

@@ -725,6 +725,7 @@ select[multiple]{min-height:80px}
   </div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
 (function() {
 'use strict';
@@ -1250,12 +1251,13 @@ async function loadOrders() {
     allOrders = await apiFetch('/api/orders');
     const tbody = $('order-list-table').querySelector('tbody');
     tbody.innerHTML = allOrders.map(o => {
+      const itemCount = o.items ? o.items.length : (o.itemCount || '-');
       return `<tr>
         <td>${o.id}</td>
         <td>${escHtml(o.tarikh)}</td>
         <td>${escHtml(o.namaPembuat)}</td>
         <td>${o.tempohMinggu || 0} minggu</td>
-        <td>-</td>
+        <td>${typeof itemCount === 'number' ? itemCount + ' item' : itemCount}</td>
         <td>
           <button class="btn btn-outline btn-sm" onclick="window._openEditOrder(${o.id})">Edit</button>
           <button class="btn btn-sm" style="color:var(--danger)" onclick="window._deleteOrder(${o.id})">Padam</button>
@@ -1402,6 +1404,10 @@ function initOrderReport() {
       html += '</tbody></table></div></div>';
       $('order-report-content').innerHTML = html;
     } catch (err) { /* handled */ }
+  });
+  // Print order report
+  $('btn-print-order-report').addEventListener('click', () => {
+    window.print();
   });
 }
 
