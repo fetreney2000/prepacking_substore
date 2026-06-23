@@ -315,6 +315,7 @@ select[multiple]{min-height:80px}
   <div class="card mb-16">
     <div class="card-header flex-between">
       <span>Stok Rendah / Kehabisan</span>
+      <div id="low-stock-toggles" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
     <div class="card-body" style="padding:0">
       <div class="table-scroll">
@@ -355,6 +356,7 @@ select[multiple]{min-height:80px}
     </label>
   </div>
   <div id="sku-table-view">
+    <div id="sku-table-toggles" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
     <div class="table-wrap">
       <table id="sku-table">
         <thead><tr>
@@ -384,6 +386,7 @@ select[multiple]{min-height:80px}
     </button>
   </div>
   <div class="card">
+    <div id="group-table-toggles" style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 16px 0"></div>
     <div class="card-body" style="padding:0">
       <div class="table-wrap">
         <table id="group-table">
@@ -443,6 +446,7 @@ select[multiple]{min-height:80px}
     </div>
   </div>
   <div class="card">
+    <div id="order-list-table-toggles" style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 16px 0"></div>
     <div class="card-body" style="padding:0">
       <div class="table-scroll">
         <table id="order-list-table">
@@ -869,6 +873,43 @@ function formatDate(d) {
 }
 function formatNum(n) {
   return Number(n || 0).toLocaleString('ms-MY');
+}
+
+// ===== COLUMN TOGGLE SYSTEM =====
+function addColumnToggles(tableId, targetId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const target = document.getElementById(targetId || tableId + '-toggles');
+  if (!target) return;
+  const headers = table.querySelectorAll('thead th');
+  if (headers.length === 0) return;
+  target.innerHTML = '';
+  headers.forEach((th, idx) => {
+    const label = th.textContent.trim();
+    const cb = document.createElement('label');
+    cb.style.cssText = 'display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;white-space:nowrap';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = true;
+    input.dataset.table = tableId;
+    input.dataset.col = idx;
+    input.addEventListener('change', function() {
+      const col = parseInt(this.dataset.col);
+      const show = this.checked;
+      const tbl = document.getElementById(this.dataset.table);
+      if (!tbl) return;
+      tbl.querySelectorAll('thead th').forEach((h, i) => { if (i === col) h.style.display = show ? '' : 'none'; });
+      tbl.querySelectorAll('tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells[col]) cells[col].style.display = show ? '' : 'none';
+      });
+    });
+    const span = document.createElement('span');
+    span.textContent = label;
+    cb.appendChild(input);
+    cb.appendChild(span);
+    target.appendChild(cb);
+  });
 }
 
 // ===== CALCULATIONS =====
@@ -1670,8 +1711,7 @@ async function buildPrintView(orderId) {
   w.document.write(printHTML);
   w.document.close();
 }
-
-// ===== SKU REPORT =====
+window.buildPrintView = buildPrintView;
 function initSKUReport() {
   $('btn-generate-sku-report').addEventListener('click', async () => {
     const statusFilter = $('sku-status-filter')?.value;
@@ -1913,6 +1953,15 @@ async function loadApp() {
   await loadOrders();
   loadSettingsForm();
   updateClock();
+  // Re-populate SKU dropdown now that allSkus is loaded
+  if ($('report-sku-filter')) {
+    $('report-sku-filter').innerHTML = '<option value="">-- Semua SKU --</option>' + allSkus.filter(s => s.enabled !== false).sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).map(s => '<option value="' + s.id + '">' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('');
+  }
+  // Initialize column toggles for all tables
+  addColumnToggles('low-stock-table', 'low-stock-toggles');
+  addColumnToggles('sku-table', 'sku-table-toggles');
+  addColumnToggles('group-table', 'group-table-toggles');
+  addColumnToggles('order-list-table', 'order-list-table-toggles');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
