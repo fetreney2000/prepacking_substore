@@ -153,13 +153,6 @@ tr:hover td{background:var(--gray-50)}
   .page{display:block!important}
   .page:not(.print-target){display:none!important}
 }
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .main-area{margin-left:0}
-  .summary-cards{grid-template-columns:1fr}
-  .form-row{grid-template-columns:1fr}
-}
 select[multiple]{min-height:80px}
 .table-scroll{overflow-x:auto;max-height:500px;overflow-y:auto}
 .highlight{background:#fef08a}
@@ -179,20 +172,6 @@ select[multiple]{min-height:80px}
 .col-toggle-bar .toggle-switch input:checked+.toggle-slider::after{transform:translateX(12px)}
 .col-toggle-bar .toggle-label{font-size:11px}
 .col-hidden,.col-hidden *{display:none!important}
-
-/* Card layout for all app tables (mobile + optional) */
-@media(max-width:768px){
-  .table-scroll table thead,.table-wrap table thead{display:none}
-  .table-scroll table tbody tr,.table-wrap table tbody tr{display:block;padding:12px;margin-bottom:10px;border:1px solid var(--gray-200);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
-  .table-scroll table tbody td,.table-wrap table tbody td{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:13px}
-  .table-scroll table tbody td:last-child,.table-wrap table tbody td:last-child{border-bottom:none}
-  .table-scroll table tbody td::before,.table-wrap table tbody td::before{content:attr(data-label);font-weight:600;color:var(--gray-500);font-size:12px;min-width:100px;flex-shrink:0}
-  .table-scroll table tbody td.text-right,.table-wrap table tbody td.text-right{text-align:right}
-  #low-stock-table,#sku-report-table,#sku-table,#group-table,#order-list-table,#order-report-content table,#sku-report-container table{font-size:13px}
-  .table-scroll table tbody tr.group-header,.table-wrap table tbody tr.group-header{background:var(--primary);color:#fff;padding:8px 12px}
-  .table-scroll table tbody tr.group-header td,.table-wrap table tbody tr.group-header td{display:block;border:none;padding:0}
-  .table-scroll table tbody td .btn,.table-wrap table tbody td .btn{width:100%;justify-content:center;margin-top:4px}
-}
 
 /* Loading overlay */
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.7);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
