@@ -125,7 +125,7 @@ tr:hover td{background:var(--gray-50)}
 .empty-state{text-align:center;padding:48px 24px;color:var(--gray-500)}
 .empty-state svg{width:48px;height:48px;margin-bottom:12px;opacity:.5}
 .empty-state p{font-size:14px}
-.text-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;display:inline-block}
+.text-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:500;z-index:2000;animation:slideIn .3s ease}
 .toast-success{background:var(--success)}
 .toast-error{background:var(--danger)}
@@ -180,8 +180,14 @@ select[multiple]{min-height:80px}
 .toggle-slider::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .toggle-switch input:checked+.toggle-slider{background:var(--primary)}
 .toggle-switch input:checked+.toggle-slider::after{transform:translateX(16px)}
-.toggle-label{font-size:0.85rem;color:var(--gray-700);font-weight:400}
+.toggle-label{font-size:12px;color:var(--gray-700);font-weight:400}
 .col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:var(--space-sm)}
+.col-toggle-bar .toggle-switch{min-height:unset;padding:3px 6px;border:1px solid var(--gray-200);border-radius:6px;background:#f8fafc;font-size:11px}
+.col-toggle-bar .toggle-slider{width:28px;height:16px}
+.col-toggle-bar .toggle-slider::after{width:12px;height:12px;top:2px;left:2px}
+.col-toggle-bar .toggle-switch input:checked+.toggle-slider::after{transform:translateX(12px)}
+.col-toggle-bar .toggle-label{font-size:11px}
+.col-hidden,.col-hidden *{display:none!important}
 
 /* Mobile card layout for tables */
 @media(max-width:768px){
@@ -612,28 +618,118 @@ select[multiple]{min-height:80px}
 <!-- ========== HELP ========== -->
 <div class="page" id="page-help">
   <div class="page-header"><h2>Bantuan</h2></div>
-  <div class="card" style="max-width:800px">
-    <div class="card-body">
+  <div class="card" style="max-width:900px">
+    <div class="card-body" style="font-size:14px;line-height:1.8">
       <h3 style="margin-bottom:12px">Pengenalan</h3>
-      <p style="font-size:14px;margin-bottom:16px">Sistem ini mengurus inventori prabungkus untuk Substor Hospital Keningau. Ia membantu mengira tahap stok, menjejaki pesanan, dan menghasilkan laporan.</p>
-      <h3 style="margin-bottom:12px">Pengiraan</h3>
-      <ul style="font-size:14px;margin-left:20px;margin-bottom:16px">
-        <li><strong>AWU (Penggunaan Mingguan Purata)</strong> = Purata penggunaan 3 bulan / 4.33</li>
-        <li><strong>Min</strong> = AWU x Minggu Minimum</li>
-        <li><strong>Penimbal</strong> = AWU x Minggu Penimbal</li>
-        <li><strong>Maks</strong> = AWU x Minggu Maksimum</li>
+      <p style="margin-bottom:16px">Sistem Inventori Prabungkus adalah aplikasi pengurusan inventori untuk <strong>Substor Hospital Keningau</strong>. Sistem ini membantu pengurus farmasi menjejaki stok ubat prabungkus, mengira tahap inventori optimum, membuat pesanan pembelian, dan menjana laporan.</p>
+
+      <h3 style="margin-bottom:12px">Papan Pemuka (Dashboard)</h3>
+      <p style="margin-bottom:8px">Paparan utama menunjukkan ringkasan inventori:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Jumlah SKU Aktif</strong> — Bilangan item aktif dalam sistem</li>
+        <li><strong>Kumpulan</strong> — Bilangan kumpulan item</li>
+        <li><strong>Jumlah Stok Semasa</strong> — Jumlah keseluruhan stok semua item</li>
+        <li><strong>Stok Rendah/Kehabisan</strong> — Bilangan item yang perlu dipesan</li>
+        <li><strong>Jadual Stok Rendah</strong> — Senarai item yang perlu dipesan</li>
       </ul>
+
+      <h3 style="margin-bottom:12px">Pengurusan SKU</h3>
+      <p style="margin-bottom:8px">Halaman ini membolehkan anda mengurus item inventori:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Tambah SKU</strong> — Klik butang "Tambah SKU" untuk menambah item baharu. Isi kod, nama, saiz pek, kumpulan, dan data penggunaan.</li>
+        <li><strong>Sunting</strong> — Klik ikon pensel untuk mengubah suai maklumat item.</li>
+        <li><strong>Padam</strong> — Klik ikon tong sampah untuk memadam item (tidak boleh jika masih ada dalam pesanan).</li>
+        <li><strong>Cari</strong> — Gunakan medan carian untuk mencari mengikut kod atau nama.</li>
+        <li><strong>Tapis Kumpulan</strong> — Pilih kumpulan untuk menapis senarai.</li>
+        <li><strong>Paparan Kad</strong> — Tukar antara paparan jadual dan kad.</li>
+        <li><strong>Tukar Stok</strong> — Klik pada nilai stok semasa untuk mengedit secara langsung.</li>
+        <li><strong>Pilihan Kolom</strong> — Gunakan suis togol untuk menunjuk/menyembunyikan lajur.</li>
+      </ul>
+      <p style="margin-bottom:16px"><strong>Medan Penting:</strong></p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Kod</strong> — Kod unik item (contoh: C08CA01000T1002XX)</li>
+        <li><strong>Saiz Pek</strong> — Bilangan unit dalam satu pek</li>
+        <li><strong>Penggunaan Bulan 1/2/3</strong> — Jumlah penggunaan untuk 3 bulan terakhir</li>
+        <li><strong>Sentiasa Stok Penuh</strong> — Aktifkan untuk item yang sentiasa ditopup ke stok maksimum</li>
+        <li><strong>Guna Tahap Manual</strong> — Aktifkan untuk menetapkan tahap Min/Penimbal/Maks secara manual</li>
+        <li><strong>Aktif</strong> — Nyahaktifkan item yang tidak lagi digunakan</li>
+      </ul>
+
+      <h3 style="margin-bottom:12px">Kumpulan</h3>
+      <p style="margin-bottom:16px">Kumpulan mengorganisasikan item mengikut kategori. Contoh: APPL (Tablet & Kapsul), CFLNS (Sirap), Bukan Ubat. Setiap SKU perlu dikaitkan dengan satu kumpulan.</p>
+
+      <h3 style="margin-bottom:12px">Cipta Pesanan</h3>
+      <p style="margin-bottom:8px">Untuk membuat pesanan baharu:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Tarikh</strong> — Tarikh pesanan (auto-diisi dengan tarikh hari ini)</li>
+        <li><strong>Nama Pembuat</strong> — Nama orang yang membuat pesanan</li>
+        <li><strong>Tempoh (Minggu)</strong> — Tempoh bekalan dalam minggu. Ubah nilai ini untuk melihat kuantiti pesanan dikira semula secara automatik.</li>
+        <li><strong>Nota</strong> — Nota tambahan untuk pesanan</li>
+      </ul>
+      <p style="margin-bottom:16px">Jadual item akan menunjukkan semua item aktif dengan kuantiti pesanan yang dikira secara automatik berdasarkan AWU × Tempoh − Stok Semasa. Anda boleh mengubah kuantiti secara manual. Tetapkan kuantiti kepada 0 untuk item yang tidak perlu dipesan.</p>
+
+      <h3 style="margin-bottom:12px">Edit Pesanan</h3>
+      <p style="margin-bottom:16px">Pilih pesanan dari senarai untuk mengubah suai tarikh, nota, atau item. Anda boleh menambah item baharu, mengubah kuantiti, atau memadam item. Kuantiti item baharu dikira automatik berdasarkan tempoh pesanan.</p>
+
+      <h3 style="margin-bottom:12px">Laporan Pesanan</h3>
+      <p style="margin-bottom:8px">Menjana laporan pesanan berdasarkan penapis:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Tarikh Dari/Hingga</strong> — Tapis mengikut julat tarikh</li>
+        <li><strong>Nama Pembuat</strong> — Tapis mengikut nama pembuat</li>
+        <li><strong>Item</strong> — Tapis mengikut item (SKU) tertentu</li>
+        <li><strong>Jana Laporan</strong> — Klik untuk menjana laporan</li>
+        <li><strong>Pilihan Kolom</strong> — Togol lajur untuk ditunjuk/disyembunyikan</li>
+      </ul>
+      <p style="margin-bottom:16px"><strong>Cetak:</strong> Klik butang "Cetak" pada senarai pesanan untuk membuka halaman cetak dalam tetingkap baharu dengan format "Borang Permohonan Stok".</p>
+
+      <h3 style="margin-bottom:12px">Laporan SKU</h3>
+      <p style="margin-bottom:8px">Menjana laporan status stok mengikut kumpulan:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Status</strong> — Tapis mengikut status: Kritikal, Amaran, Baik, atau Kehabisan</li>
+        <li><strong>Jana Laporan</strong> — Klik untuk menjana laporan</li>
+        <li><strong>Cetak</strong> — Cetak laporan dalam tetingkap baharu</li>
+        <li><strong>Pilihan Kolom</strong> — Togol lajur (Min, Penimbal, Maks, Kumpulan tersembunyi secara default)</li>
+      </ul>
+
+      <h3 style="margin-bottom:12px">Pengiraan Tahap Inventori</h3>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>AWU (Penggunaan Mingguan Purata)</strong> = (Bulan 1 + Bulan 2 + Bulan 3) ÷ 12</li>
+        <li><strong>Min</strong> = AWU × Minggu Minimum (dibulatkan ke atas mengikut saiz pek)</li>
+        <li><strong>Penimbal</strong> = AWU × Minggu Penimbal (dibulatkan ke atas mengikut saiz pek)</li>
+        <li><strong>Maks</strong> = AWU × Minggu Maksimum (dibulatkan ke atas mengikut saiz pek)</li>
+      </ul>
+      <p style="margin-bottom:16px">Nilai Minggu Minimum, Penimbal, dan Maksimum boleh ditetapkan di halaman Tetapan.</p>
+
       <h3 style="margin-bottom:12px">Status Stok</h3>
-      <ul style="font-size:14px;margin-left:20px;margin-bottom:16px">
-        <li><span class="badge badge-success">OK</span> Stok melebihi tahap penimbal</li>
-        <li><span class="badge badge-warning">Rendah</span> Stok antara min dan penimbal</li>
-        <li><span class="badge badge-danger">Kritikal</span> Stok di bawah min</li>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><span class="badge badge-success">OK</span> Stok melebihi tahap penimbal — stok mencukupi</li>
+        <li><span class="badge badge-warning">Rendah</span> Stok antara min dan penimbal — perlu dipesan</li>
+        <li><span class="badge badge-danger">Kritikal</span> Stok di bawah min — perlu dipesan segera</li>
         <li><span class="badge badge-gray">Kehabisan</span> Stok sifar</li>
       </ul>
+
+      <h3 style="margin-bottom:12px">Tetapan</h3>
+      <p style="margin-bottom:16px">Konfigurasikan parameter pengiraan: tajuk aplikasi, minggu minimum, penimbal, dan maksimum. Mod paparan boleh ditukar antara Jadual dan Kad.</p>
+
+      <h3 style="margin-bottom:12px">Penyelarasan (Sync)</h3>
+      <p style="margin-bottom:8px">Pengurusan data:</p>
+      <ul style="margin-left:20px;margin-bottom:16px">
+        <li><strong>Simpan</strong> — Muat turun fail JSON mengandungi semua data (tetapan, kumpulan, SKU, pesanan, item pesanan)</li>
+        <li><strong>Import</strong> — Muat naik fail JSON untuk menggantikan semua data sedia ada (berhati-hati: ini akan memadam data sedia ada)</li>
+        <li><strong>Import Excel</strong> — Muat naik fail Excel (.xlsx) untuk mengemas kini stok semasa mengikut kod item</li>
+      </ul>
+
+      <h3 style="margin-bottom:12px">Pilihan Kolom Jadual</h3>
+      <p style="margin-bottom:16px">Semua jadual mempunyai suis togol di atasnya. Gunakan suis ini untuk menunjuk atau menyembunyikan lajur mengikut keperluan. Keadaan lajur ditetapkan semula setiap kali halaman dimuat semula.</p>
+
+      <h3 style="margin-bottom:12px">Ciri Mudah Alih</h3>
+      <p style="margin-bottom:16px">Aplikasi ini mesra telefon pintar. Menu sisi boleh dibuka/ditutup melalui butang hamburger. Jadual ditukar kepada format kad pada skrin kecil. Butang bersaiz sesuai untuk sentuhan (min 44px).</p>
+
       <h3 style="margin-bottom:12px">Pintasan Papan Kekunci</h3>
-      <ul style="font-size:14px;margin-left:20px">
-        <li>Arrow keys dalam jadual: tatal</li>
-        <li>Ctrl+F: Fokus medan carian</li>
+      <ul style="margin-left:20px">
+        <li><strong>Anak Panah</strong> — Tatal jadual ke atas/bawah</li>
+        <li><strong>Page Up/Down</strong> — Tatal jadual dengan cepat</li>
+        <li><strong>Escape</strong> — Tutup dialog mod</li>
       </ul>
     </div>
   </div>
@@ -646,6 +742,20 @@ select[multiple]{min-height:80px}
     <div class="card-body" style="text-align:center;padding:48px">
       <p style="font-size:16px;font-weight:600;margin-bottom:8px">Sistem Inventori Prabungkus Hospital Keningau</p>
       <p style="color:var(--gray-500);margin-bottom:24px">Versi 2.0</p>
+      <div style="margin-bottom:24px">
+        <p style="font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:4px">Ahmad Fetre Bin Mohammad Zime</p>
+        <p style="font-size:13px;color:var(--gray-500)">Pembangun Aplikasi</p>
+      </div>
+      <div style="margin-bottom:24px">
+        <p style="font-size:13px;color:var(--gray-600)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+          016-881 3920
+        </p>
+        <p style="font-size:13px;color:var(--gray-600)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align:middle"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          fetreney2000@gmail.com
+        </p>
+      </div>
       <p style="font-size:13px;color:var(--gray-400)">&copy; 2026 Hospital Keningau, Sabah, Malaysia.</p>
       <p style="font-size:13px;color:var(--gray-400);margin-top:4px">Hak cipta terpelihara.</p>
     </div>
@@ -1723,7 +1833,16 @@ async function buildPrintView(orderId) {
       });
   });
 
-  const sharedCSS = getReportDocumentCSS();
+  const sharedCSS = getReportDocumentCSS(`
+    .col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .col-toggle-bar .toggle-switch{padding:3px 6px;border:1px solid #999;border-radius:6px;background:#f5f5f5;font-size:11px}
+    .col-toggle-bar .toggle-slider{width:28px;height:16px;background:#999}
+    .col-toggle-bar .toggle-slider::after{width:12px;height:12px}
+    .col-toggle-bar .toggle-switch input:checked+.toggle-slider{background:#333}
+    .col-toggle-bar .toggle-switch input:checked+.toggle-slider::after{transform:translateX(12px)}
+    .col-toggle-bar .toggle-label{font-size:11px;color:#333}
+    @media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}
+  `);
   const bodyHTML = `
     <div style="background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff;text-align:center;margin-bottom:16px;padding:16px;border-radius:4px">
       <h2 style="font-size:16pt;margin:0;color:#fff">${escHtml(appTitle)}</h2>
@@ -1736,8 +1855,15 @@ async function buildPrintView(orderId) {
       <strong>Kumpulan:</strong> ${escHtml(supplierGroup)}
       ${orderData.notes ? '<br><strong>Nota:</strong> '+escHtml(orderData.notes) : ''}
     </div>
+    <div class="col-toggle-bar" style="margin-bottom:8px">
+      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
+      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
+      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
+      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
+    </div>
     <table>
-      <thead><tr><th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Min</th><th>Penimbal</th><th>Maks</th><th>Stok</th><th>Kuantiti</th><th>Nota</th></tr></thead>
+      <thead><tr><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-kumpulan">Kumpulan</th><th class="pc-min">Min</th><th class="pc-penimbal">Penimbal</th><th class="pc-maks">Maks</th><th class="pc-stok">Stok</th><th>Kuantiti</th><th class="pc-nota">Nota</th></tr></thead>
       <tbody>${rowsHTML}</tbody>
     </table>
     <div style="display:flex;gap:60px;margin-top:30px">
@@ -1834,6 +1960,17 @@ function initSKUReport() {
       return;
     }
     const title = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+    // Clone the container and add print-friendly class names for toggle targets
+    const cloned = container.cloneNode(true);
+    cloned.querySelectorAll('td').forEach(td => {
+      const cls = td.className;
+      if (cls.includes('sr-kumpulan')) td.classList.add('pr-kumpulan');
+      if (cls.includes('sr-stok')) td.classList.add('pr-stok');
+      if (cls.includes('sr-min')) td.classList.add('pr-min');
+      if (cls.includes('sr-penimbal')) td.classList.add('pr-penimbal');
+      if (cls.includes('sr-maks')) td.classList.add('pr-maks');
+      if (cls.includes('sr-nota')) td.classList.add('pr-nota');
+    });
     const printCSS = getReportDocumentCSS(`
       .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9pt;font-weight:600;white-space:nowrap}
       .badge-success{background:#dcfce7;color:#166534}
@@ -1841,10 +1978,24 @@ function initSKUReport() {
       .badge-danger{background:#fee2e2;color:#991b1b}
       .badge-info{background:#dbeafe;color:#1e40af}
       .badge-gray{background:#f1f5f9;color:#374151}
+      .col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+      .col-toggle-bar .toggle-switch{padding:3px 6px;border:1px solid #999;border-radius:6px;background:#f5f5f5;font-size:11px}
+      .col-toggle-bar .toggle-slider{width:28px;height:16px;background:#999}
+      .col-toggle-bar .toggle-slider::after{width:12px;height:12px}
+      .col-toggle-bar .toggle-switch input:checked+.toggle-slider{background:#333}
+      .col-toggle-bar .toggle-switch input:checked+.toggle-slider::after{transform:translateX(12px)}
+      .col-toggle-bar .toggle-label{font-size:11px;color:#333}
+      @media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}
     `);
     const printHTML = `<!DOCTYPE html><html lang="ms"><head><meta charset="UTF-8"><title>${escHtml(title)} — Laporan SKU</title><style>${printCSS}</style></head><body>
       <div style="background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff;text-align:center;margin-bottom:16px;padding:16px;border-radius:4px"><h2 style="font-size:16pt;margin:0;color:#fff">${escHtml(title)}</h2><h3 style="font-size:13pt;margin:4px 0;color:#93c5fd">Laporan SKU</h3></div>
-      ${container.innerHTML}
+      <div class="col-toggle-bar" style="margin-bottom:8px">
+        <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pr-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
+        <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pr-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
+        <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pr-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pr-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pr-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Buffer/Maks</span></label>
+        <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pr-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
+      </div>
+      ${cloned.innerHTML}
       <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
     </body></html>`;
     const w = window.open('', '_blank');
