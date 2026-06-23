@@ -1753,7 +1753,7 @@ function initOrderReport() {
       { id: 'rc-qty', label: 'Kuantiti' }
     ];
 
-    const toggleBar = `<div class="col-toggle-bar" style="margin-bottom:8px;">${cols.map((c, idx) => `<label class="toggle-switch"><input type="checkbox" ${idx===0?'':'checked'} onchange="document.querySelectorAll('.${c.id}').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">${c.label}</span></label>`).join('')}</div>`;
+    const toggleBar = `<div class="col-toggle-bar" style="margin-bottom:8px;">${cols.map((c, idx) => `<label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.${c.id}').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">${c.label}</span></label>`).join('')}</div>`;
 
     let rowsHTML = allItems.map(item => {
       const order = orderMap[item._order?.id] || {};
@@ -1803,7 +1803,20 @@ async function buildPrintView(orderId) {
   groups.forEach(g => { groupMap[g.id] = g.name; });
   const appTitle = appSettings.appTitle || 'Sistem Inventori Prabungkus';
 
-  // Group items by kumpulan
+  // Build set of ordered SKU IDs
+  const orderedSkuIds = new Set();
+  items.forEach(item => {
+    if (item.skuId) orderedSkuIds.add(item.skuId);
+    else {
+      const match = skus.find(s => (s.kod||'').toLowerCase() === (item.kod||'').toLowerCase());
+      if (match) orderedSkuIds.add(match.id);
+    }
+  });
+
+  // Find active items NOT in the order
+  const notOrdered = skus.filter(s => s.enabled !== false && !orderedSkuIds.has(s.id));
+
+  // Group ordered items by kumpulan
   const grouped = {};
   items.forEach(item => {
     const sku = skuMap[item.skuId] || skuMap[(item.kod||'').toLowerCase()];
@@ -1814,6 +1827,14 @@ async function buildPrintView(orderId) {
   });
   const groupNames = Object.keys(grouped).sort();
   const supplierGroup = groupNames.length === 1 ? groupNames[0] : 'Pelbagai';
+
+  // Group not-ordered items by kumpulan
+  const notOrderedGrouped = {};
+  notOrdered.forEach(sku => {
+    const groupName = groupMap[sku.groupId] || '(Tiada Kumpulan)';
+    if (!notOrderedGrouped[groupName]) notOrderedGrouped[groupName] = [];
+    notOrderedGrouped[groupName].push(sku);
+  });
 
   let rowsHTML = '';
   groupNames.forEach(groupName => {
@@ -1832,6 +1853,38 @@ async function buildPrintView(orderId) {
       });
   });
 
+  // Build not-ordered section
+  let notOrderedHTML = '';
+  if (notOrdered.length > 0) {
+    notOrderedHTML = `
+      <div style="margin-top:24px;page-break-before:always">
+        <h3 style="font-size:12pt;color:#1E3A8A;margin-bottom:8px;border-bottom:2px solid #2563EB;padding-bottom:4px">Item Yang Tidak Dipesan (${notOrdered.length} item)</h3>
+        <table>
+          <thead><tr><th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok Semasa</th><th>AWU</th><th>Min</th><th>Status</th></tr></thead>
+          <tbody>`;
+    Object.keys(notOrderedGrouped).sort().forEach(groupName => {
+      notOrderedHTML += `<tr class="group-header"><td colspan="7"><strong>${escHtml(groupName)}</strong></td></tr>`;
+      notOrderedGrouped[groupName]
+        .sort((a, b) => (a.nama||'').localeCompare(b.nama||''))
+        .forEach(sku => {
+          const levels = calculateLevels(sku);
+          const status = determineStockStatus(sku);
+          const awu = levels.awu;
+          const statusMap = { ok: 'OK', low: 'Rendah', critical: 'Kritikal', out: 'Habis' };
+          notOrderedHTML += `<tr>
+            <td><code>${escHtml(sku.kod||'')}</code></td>
+            <td>${escHtml(sku.nama||'')}</td>
+            <td>${escHtml(groupMap[sku.groupId]||'—')}</td>
+            <td>${sku.stokSemasa||0}</td>
+            <td>${awu}</td>
+            <td>${levels.min}</td>
+            <td><span class="badge badge-${status === 'critical' || status === 'out' ? 'danger' : status === 'low' ? 'warning' : 'success'}">${statusMap[status]||status}</span></td>
+          </tr>`;
+        });
+    });
+    notOrderedHTML += '</tbody></table></div>';
+  }
+
   const sharedCSS = getReportDocumentCSS(`
     .col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
     .col-toggle-bar .toggle-switch{padding:3px 6px;border:1px solid #999;border-radius:6px;background:#f5f5f5;font-size:11px}
@@ -1840,6 +1893,10 @@ async function buildPrintView(orderId) {
     .col-toggle-bar .toggle-switch input:checked+.toggle-slider{background:#333}
     .col-toggle-bar .toggle-switch input:checked+.toggle-slider::after{transform:translateX(12px)}
     .col-toggle-bar .toggle-label{font-size:11px;color:#333}
+    .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9pt;font-weight:600}
+    .badge-success{background:#dcfce7;color:#166534}
+    .badge-warning{background:#fef3c7;color:#92400e}
+    .badge-danger{background:#fee2e2;color:#991b1b}
     @media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}
   `);
   const bodyHTML = `
@@ -1855,16 +1912,17 @@ async function buildPrintView(orderId) {
       ${orderData.notes ? '<br><strong>Nota:</strong> '+escHtml(orderData.notes) : ''}
     </div>
     <div class="col-toggle-bar" style="margin-bottom:8px">
-      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
-      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
-      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
-      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
-      <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.pc-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
     </div>
     <table>
       <thead><tr><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-kumpulan">Kumpulan</th><th class="pc-min">Min</th><th class="pc-penimbal">Penimbal</th><th class="pc-maks">Maks</th><th class="pc-stok">Stok</th><th>Kuantiti</th><th class="pc-nota">Nota</th></tr></thead>
       <tbody>${rowsHTML}</tbody>
     </table>
+    ${notOrderedHTML}
     <div style="display:flex;gap:60px;margin-top:30px">
       <div style="flex:1"><p style="margin-bottom:60px"><strong>Disediakan oleh:</strong><br><small>(Pembuat Pesanan)</small></p></div>
       <div style="flex:1"><p style="margin-bottom:60px"><strong>Disahkan oleh:</strong><br><small>(Tandatangan &amp; Cop)</small></p></div>
@@ -1980,9 +2038,9 @@ function initSKUReport() {
       <div class="col-toggle-bar" style="margin-bottom:8px">
         <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.sr-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
         <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.sr-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Buffer/Maks</span></label>
-        <label class="toggle-switch"><input type="checkbox" onchange="document.querySelectorAll('.sr-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
+        <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.sr-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
       </div>
-      ${container.innerHTML}
+      ${container.innerHTML.replace(/col-hidden/g, '')}
       <div class="print-actions"><button class="btn-print" onclick="window.print()">Cetak</button><button class="btn-close" onclick="window.close()">Tutup</button></div>
     </body></html>`;
     const w = window.open('', '_blank');
