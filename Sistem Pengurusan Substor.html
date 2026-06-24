@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Sistem Inventori Prabungkus Hospital Keningau</title>
+<title>Sistem Inventori Farmasi</title>
 <style>
 :root {
   --primary: #2563eb;
@@ -350,7 +350,7 @@ tbody tr{transition:background .12s ease}
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-    <h2 id="sidebar-title">Sistem Inventori Prabungkus</h2>
+    <h2 id="sidebar-title">Sistem Inventori Farmasi</h2>
   </div>
   <nav class="sidebar-nav" id="sidebar-nav">
     <button class="nav-item active" data-page="dashboard">
@@ -363,7 +363,7 @@ tbody tr{transition:background .12s ease}
     </button>
     <button class="nav-item" data-page="groups">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Kumpulan
+      Pengurusan Kumpulan
     </button>
     <button class="nav-item" data-page="create-order">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
@@ -371,7 +371,7 @@ tbody tr{transition:background .12s ease}
     </button>
     <button class="nav-item" data-page="edit-order">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-      Edit Pesanan
+      Senarai Pesanan
     </button>
     <button class="nav-item" data-page="order-report">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -387,7 +387,7 @@ tbody tr{transition:background .12s ease}
     </button>
     <button class="nav-item" data-page="sync">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      Selaraskan
+      Penyelarasan Data
     </button>
     <button class="nav-item" data-page="help">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -405,7 +405,7 @@ tbody tr{transition:background .12s ease}
   <button class="btn-icon no-print" id="menu-toggle" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
   </button>
-  <h1 id="app-title-display">Sistem Inventori Prabungkus Hospital Keningau</h1>
+  <h1 id="app-title-display">Sistem Inventori Farmasi</h1>
   <div class="header-right">
     <span id="clock-display" style="font-size:13px;color:rgba(255,255,255,.8)"></span>
   </div>
@@ -482,7 +482,7 @@ tbody tr{transition:background .12s ease}
 <!-- ========== GROUPS ========== -->
 <div class="page" id="page-groups">
   <div class="page-header">
-    <h2>Kumpulan</h2>
+    <h2>Pengurusan Kumpulan</h2>
     <button class="btn btn-primary" id="btn-add-group">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14m-7-7h14"/></svg>
       Tambah Kumpulan
@@ -540,7 +540,7 @@ tbody tr{transition:background .12s ease}
 <!-- ========== EDIT ORDER ========== -->
 <div class="page" id="page-edit-order">
   <div class="page-header">
-    <h2>Edit / Urus Pesanan</h2>
+    <h2>Senarai Pesanan</h2>
   </div>
   <div class="filter-bar">
     <div class="search-box">
@@ -649,13 +649,6 @@ tbody tr{transition:background .12s ease}
           <input type="text" id="setting-filename">
         </div>
       </div>
-      <div class="form-group">
-        <label>Mod Paparan</label>
-        <select id="setting-layout-mode">
-          <option value="table">Jadual</option>
-          <option value="card">Kad</option>
-        </select>
-      </div>
       <div style="margin-top:20px">
         <button class="btn btn-primary" id="btn-save-settings">Simpan Tetapan</button>
       </div>
@@ -665,7 +658,7 @@ tbody tr{transition:background .12s ease}
 
 <!-- ========== SYNC ========== -->
 <div class="page" id="page-sync">
-  <div class="page-header"><h2>Selaraskan Data</h2></div>
+  <div class="page-header"><h2>Penyelarasan Data</h2></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px">
     <div class="card">
       <div class="card-header">Eksport Pangkalan Data</div>
@@ -708,7 +701,7 @@ tbody tr{transition:background .12s ease}
   <div class="card" style="max-width:900px">
     <div class="card-body" style="font-size:14px;line-height:1.8">
       <h3 style="margin-bottom:12px">Pengenalan</h3>
-      <p style="margin-bottom:16px">Sistem Inventori Prabungkus adalah aplikasi pengurusan inventori untuk <strong>Substor Hospital Keningau</strong>. Sistem ini membantu pengurus farmasi menjejaki stok ubat prabungkus, mengira tahap inventori optimum, membuat pesanan pembelian, dan menjana laporan.</p>
+      <p style="margin-bottom:16px">Sistem Inventori Farmasi adalah aplikasi pengurusan inventori untuk <strong>Substor Hospital Keningau</strong>. Sistem ini membantu pengurus farmasi menjejaki stok ubat prabungkus, mengira tahap inventori optimum, membuat pesanan pembelian, dan menjana laporan.</p>
 
       <h3 style="margin-bottom:12px">Papan Pemuka (Dashboard)</h3>
       <p style="margin-bottom:8px">Paparan utama menunjukkan ringkasan inventori:</p>
@@ -826,7 +819,7 @@ tbody tr{transition:background .12s ease}
   <div class="page-header"><h2>Hak Cipta</h2></div>
   <div class="card" style="max-width:600px">
     <div class="card-body" style="text-align:center;padding:48px">
-      <p style="font-size:16px;font-weight:600;margin-bottom:8px">Sistem Inventori Prabungkus Hospital Keningau</p>
+      <p style="font-size:16px;font-weight:600;margin-bottom:8px" id="copyright-app-name">Sistem Inventori Farmasi</p>
       <p style="color:var(--gray-500);margin-bottom:24px">Versi 2.0</p>
       <div style="margin-bottom:24px">
         <p style="font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:4px">Ahmad Fetre Bin Mohammad Zime</p>
@@ -852,7 +845,7 @@ tbody tr{transition:background .12s ease}
 
 <footer class="footer-bar">
   <span id="footer-clock"></span>
-  <span style="margin-left:auto">Sistem Inventori Prabungkus v2.0</span>
+  <span style="margin-left:auto" id="footer-version-text">Sistem Inventori Farmasi v2.0</span>
 </footer>
 </div>
 </div>
@@ -1656,19 +1649,25 @@ window._openEditOrder = async function(id) {
 };
 function renderEditOrderItems() {
   const container = $('edit-order-items');
-  container.innerHTML = editingOrderItems.map((item, i) => `
+  container.innerHTML = editingOrderItems.map((item, i) => {
+    const sku = allSkus.find(s => s.kod === item.kod);
+    const awu = sku ? Math.round(calculateAWU(sku)) : 0;
+    const stock = sku ? (sku.stokSemasa || 0) : 0;
+    const stockInfo = item.kod ? `<span style="font-size:11px;color:var(--gray-500);white-space:nowrap">Stok: <strong>${stock}</strong> &nbsp; AWU: <strong>${awu}</strong></span>` : '';
+    return `
     <div class="order-item-row" data-idx="${i}">
       <select onchange="window._updateEditItem(${i},'kod',this.value)" style="flex:2">
         <option value="">Pilih SKU</option>
         ${allSkus.map(s => '<option value="' + s.kod + '"' + (item.kod === s.kod ? ' selected' : '') + '>' + escHtml(s.kod) + ' - ' + escHtml(s.nama) + '</option>').join('')}
       </select>
+      ${stockInfo}
       <input type="number" value="${item.qtyOrdered || 0}" min="0" style="flex:1" onchange="window._updateEditItem(${i},'qtyOrdered',parseInt(this.value)||0)" placeholder="Kuantiti">
       <input type="text" value="${item.notes || ''}" style="flex:1" onchange="window._updateEditItem(${i},'notes',this.value)" placeholder="Nota">
       <button class="btn-icon item-remove" onclick="window._removeEditItem(${i})" title="Padam">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 window._updateEditItem = function(idx, field, val) {
   editingOrderItems[idx][field] = val;
@@ -1897,7 +1896,7 @@ async function buildPrintView(orderId) {
   skus.forEach(s => { skuMap[s.id] = s; skuMap[(s.kod||'').toLowerCase()] = s; });
   const groupMap = {};
   groups.forEach(g => { groupMap[g.id] = g.name; });
-  const appTitle = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+  const appTitle = appSettings.appTitle || 'Sistem Inventori Farmasi';
 
   // Build set of ordered SKU IDs
   const orderedSkuIds = new Set();
@@ -1934,14 +1933,16 @@ async function buildPrintView(orderId) {
 
   let rowsHTML = '';
   groupNames.forEach(groupName => {
-    rowsHTML += `<tr class="group-header"><td colspan="9"><strong>${escHtml(groupName)}</strong></td></tr>`;
+    rowsHTML += `<tr class="group-header"><td colspan="10"><strong>${escHtml(groupName)}</strong></td></tr>`;
     grouped[groupName]
       .sort((a, b) => ((a.sku||{}).nama||'').localeCompare((b.sku||{}).nama||''))
       .forEach(({ sku, levels, qtyOrdered, notes }) => {
+        const awu = sku ? Math.round(calculateAWU(sku)) : 0;
         rowsHTML += `<tr>
           <td class="pc-kod"><code>${escHtml((sku||{}).kod||'')}</code></td>
           <td class="pc-nama">${escHtml((sku||{}).nama||'')}</td>
           <td class="pc-kumpulan">${escHtml(groupMap[(sku||{}).groupId]||'—')}</td>
+          <td class="pc-awu">${awu}</td>
           <td class="pc-min">${levels.min}</td><td class="pc-penimbal">${levels.penimbal}</td><td class="pc-maks">${levels.maks}</td>
           <td class="pc-stok">${(sku||{}).stokSemasa||0}</td><td>${qtyOrdered||0}</td>
           <td class="pc-nota">${escHtml(notes||'')}</td>
@@ -2010,12 +2011,16 @@ async function buildPrintView(orderId) {
     <div class="col-toggle-bar" style="margin-bottom:8px">
       <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
       <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
-      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-awu').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">AWU</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Penimbal</span></label>
+      <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Maks</span></label>
       <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
       <label class="toggle-switch"><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nota').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nota</span></label>
     </div>
     <table>
-      <thead><tr><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-kumpulan">Kumpulan</th><th class="pc-min">Min</th><th class="pc-penimbal">Penimbal</th><th class="pc-maks">Maks</th><th class="pc-stok">Stok</th><th>Kuantiti</th><th class="pc-nota">Nota</th></tr></thead>
+      <thead><tr><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-kumpulan">Kumpulan</th><th class="pc-awu">AWU</th><th class="pc-min">Min</th><th class="pc-penimbal">Penimbal</th><th class="pc-maks">Maks</th><th class="pc-stok">Stok</th><th>Kuantiti</th><th class="pc-nota">Nota</th></tr></thead>
       <tbody>${rowsHTML}</tbody>
     </table>
     ${notOrderedHTML}
@@ -2112,7 +2117,7 @@ function initSKUReport() {
       showCustomAlert('Amaran', 'Sila jana laporan dahulu sebelum mencetak.');
       return;
     }
-    const title = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+    const title = appSettings.appTitle || 'Sistem Inventori Farmasi';
     const printCSS = getReportDocumentCSS(`
       .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9pt;font-weight:600;white-space:nowrap}
       .badge-success{background:#dcfce7;color:#166534}
@@ -2154,14 +2159,15 @@ function initSettingsForm() {
       minWeeks: parseInt($('setting-min-weeks').value) || 2,
       bufferWeeks: parseInt($('setting-buffer-weeks').value) || 4,
       maxWeeks: parseInt($('setting-max-weeks').value) || 6,
-      defaultFilename: $('setting-filename').value.trim(),
-      layoutMode: $('setting-layout-mode').value
+      defaultFilename: $('setting-filename').value.trim()
     };
     try {
       await apiFetch('/api/settings', { method: 'PUT', body: JSON.stringify(body) });
       appSettings = { ...appSettings, ...body };
       document.title = body.appTitle;
       $('app-title-display').textContent = body.appTitle;
+      $('sidebar-title').textContent = body.appTitle;
+      if ($('copyright-app-name')) $('copyright-app-name').textContent = body.appTitle;
       showToast('Tetapan disimpan');
     } catch (err) { /* handled */ }
   });
@@ -2172,7 +2178,6 @@ function loadSettingsForm() {
   $('setting-buffer-weeks').value = appSettings.bufferWeeks || 4;
   $('setting-max-weeks').value = appSettings.maxWeeks || 6;
   $('setting-filename').value = appSettings.defaultFilename || '';
-  $('setting-layout-mode').value = appSettings.layoutMode || 'table';
 }
 
 // ===== SYNC =====
@@ -2296,12 +2301,13 @@ function initDashboardSearch() {
 async function loadApp() {
   try {
     appSettings = await apiFetch('/api/settings');
-    $('app-title-display').textContent = appSettings.appTitle || 'Sistem Inventori Prabungkus Hospital Keningau';
-    document.title = appSettings.appTitle || 'Sistem Inventori Prabungkus Hospital Keningau';
-    $('sidebar-title').textContent = appSettings.appTitle || 'Sistem Inventori Prabungkus';
+    $('app-title-display').textContent = appSettings.appTitle || 'Sistem Inventori Farmasi';
+    document.title = appSettings.appTitle || 'Sistem Inventori Farmasi';
+    $('sidebar-title').textContent = appSettings.appTitle || 'Sistem Inventori Farmasi';
+    if ($('copyright-app-name')) $('copyright-app-name').textContent = appSettings.appTitle || 'Sistem Inventori Farmasi';
   } catch (err) {
     console.error('Settings load error:', err);
-    appSettings = { minWeeks: 2, bufferWeeks: 4, maxWeeks: 6, appTitle: 'Sistem Inventori Prabungkus Hospital Keningau' };
+    appSettings = { minWeeks: 2, bufferWeeks: 4, maxWeeks: 6, appTitle: 'Sistem Inventori Farmasi' };
   }
   await loadDashboard();
   await loadSkus();
